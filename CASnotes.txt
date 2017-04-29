@@ -1,0 +1,5 @@
+
+TODO:
+1-writeBigIntClass
+2-Finish Rational class
+3-Write Evaluations Functions
