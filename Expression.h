@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <string>
+#include <map>
+#include "Rational.h"
 
 class Expression{
   private:
@@ -91,6 +93,8 @@ class Expression{
     //
     // Misc
     //
+
+
 };
 
 
