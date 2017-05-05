@@ -15,9 +15,16 @@ class Expression{
     bool communative;
     bool associative;
     std::vector<std::string> distributes_over; // list of tags
-  protected:
-    std::vector<*Expression> operands;
   public:
+    //
+    // Variables
+    //
+    std::vector<*Expression> operands;
+
+    Rational value;
+
+    std::string var_name;
+
     ///
     /// CONSTRUCTOR
     ///
@@ -43,12 +50,6 @@ class Expression{
     //
 
     /**
-      @params: position of operand in operands vector to return
-      @return: operand at given position
-    */
-    Expression getRator(int pos);
-
-    /**
       @params: None
       @return: returns tag representing the operation this expression uses
                such tags are defined in FunctionTags.h
@@ -65,95 +66,68 @@ class Expression{
       @params: None
       @return: boolean telling if expression uses an associative operation
     */
-    bool isAssociative()
+    bool isAssociative();
 
+    /**
+      @params: None;
+      @return: boolean value indicating if current expression is a VARIABLE
+    */
+    bool isVariable();
+
+    /**
+      @params: None;
+      @return: boolean value indicating if current expression is a RATIONAL
+    */
+    bool isRational();
     /**
       @params: None
       @return: return vector of tags the current operation distrubutes over
     */
     vector<string> getDistributeOver();
 
+    /**
+      @params: None
+      @return: integer indicating size of operands vector
+    */
+    int size();
+
+    /**
+      @params: None
+      @return: Rational indicating value of expression
+      //NOTE: should only be used if tag = RATIONAL
+      will raise and exception if above condition is not met
+    */
+    Rational getValue();
+
+    /**
+      @params: None
+      @return: string indicating name of variable
+      //NOTE: should only be used if tag = VARIABLE
+      will raise and exception if the above condition is not met
+    */
+    string get_name();
+
     //
     // Setters
     //
 
-    /**
-      @params: E is an expresion we are going to add to operands
-      @return: boolean value indicating if operation was successful
-    */
-    bool virtual addOperand(Expression * E);
-
-    /**
-      @params: position of Expression in operands vector
-      @return: boolean value indicating if operation was sucessful
-    */
-    bool virtual deleteOperand(int pos);
-
-
     //
-    // Misc
+    // Operators
     //
 
+  // Assignment / mutable operators
+  Expression& operator=(const Expression & other);
+
+  // Relational Operators
+  bool operator==(const Expression& lhs, const Expression& rhs);
+  bool operator!=(const Expression& lhs, const Expresion& rhs);
+  bool operator< (const Expression& lhs, const Expression& rhs);
+  bool operator> (const Expression& lhs, const Expression& rhs);
+  bool operator<=(const Expression& lhs, const Expression& rhs);
+  bool operator>=(const Expression& lhs, const Expression& rhs);
+
+  Expression* operator[](int pos);
 
 };
-
-
-///
-/// CONSTRUCTOR
-///
-Expression::Expression(
-  std::string tag_string
-  max_operands_int,
-  min_operands_int,
-  Expression (*operator_ptr)(std::vector<*Expression>),
-  bool communative_bool,
-  bool associative_bool,
-  std::vector<std::string> distributes_over_vector,
-  std::vector<*Expression> operands_vector,
-) : tag(tag_string),
-    operands(operands_vector);
-    max_operands(max_operand_int),
-    min_operands(min_operands_int),
-    operator(operator_ptr),
-    communative(communative_bool),
-    associative(associative_bool),
-    distributes_over(distributes_over_vector)
-  {
-    if(operands.size() > max_operands){
-      throw "too many operands";
-    }
-    else if(operands.size() < min_operands){
-      throw "too few operands";
-    }
-  }
-
-
-virtual Expression::~Expression(){
-  for(auto &operand : operands){
-    delete operand;
-  }
-}
-
-
-const Expression * Expression::getRator(int pos){
-  return operands[pos]; // might not work so watch out here...
-}
-
-std::string Expression::getTag(){
-  return tag;
-}
-
-bool isCommunative(){
-  return communative;
-}
-
-bool isAssociative(){
-  return associative;
-}
-
-vector<string> getDistributeOver(){
-  return distributes_over;
-}
-
 
 #endif

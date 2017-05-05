@@ -11,14 +11,7 @@ namespace FunctionTags{
   std::string EXPONENT = "EXPONENT";
   std::string VARIABLE = "VARIABLE";
   std::string RATIONAL = "RATIONAL";
-
-  // tag_map below just maps the above strings to their respective evaluation function
-  std::map<string,Expression (*operator)(std::vector<*Expression>)> tag_map;
 }
-
-//TODO: need to define tag_map
-
-
 
 
 #endif
