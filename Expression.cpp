@@ -1,45 +1,58 @@
+#include <vector>
+#include <string>
+#include <map>
 
+#include "Rational.h"
+#include "FunctionTags.h"
 
 ///
-/// CONSTRUCTOR
+/// CONSTRUCTORS
 ///
 Expression::Expression(
-  std::string tag_string
-  max_operands_int,
-  min_operands_int,
-  Expression (*operator_ptr)(std::vector<*Expression>),
-  bool communative_bool,
-  bool associative_bool,
-  std::vector<std::string> distributes_over_vector,
-  std::vector<*Expression> operands_vector,
-) : tag(tag_string),
-    operands(operands_vector);
-    max_operands(max_operand_int),
-    min_operands(min_operands_int),
-    operator(operator_ptr),
-    communative(communative_bool),
-    associative(associative_bool),
-    distributes_over(distributes_over_vector)
-  {
-    if(operands.size() > max_operands){
-      throw "too many operands";
-    }
-    else if(operands.size() < min_operands){
-      throw "too few operands";
+    int max_operands_int,
+    int min_operands_int,
+    bool communative_bool,
+    bool associative_bool,
+    Rational value_rational,
+    std::string var_name_string,
+    std::vector<*Expression> operands_vector,
+  ) : max_operands(max_operands_int),
+      min_operands(min_operands_int),
+      communative(communative_bool),
+      associative(associative_bool),
+      value(value_rational),
+      var_name(var_name_string),
+      operands(operands_vector)
+      {}
+
+Expression(const Expression & other){
+  if(*this != other){
+    max_operands = E.max_operands;
+    min_operands = E.min_operands;
+    communative = E.communative;
+    value = E.value;
+    var_name = E.var_name;
+    _delete_operands();
+    for(Expression*& operand : other.operands){
+      Expression to_add = (*operand); // will call copy constructor and recurse
+      operands.push_back(to_add)
     }
   }
+}
 
 
 virtual Expression::~Expression(){
-  for(auto &operand : operands){
-    delete operand;
+  for( Expresion*& E : operands){
+    if( E != 0){
+      delete E;
+      E = 0;
+    }
   }
 }
 
-
-const Expression * Expression::getRator(int pos){
-  return operands[pos]; // might not work so watch out here...
-}
+//
+// Getters
+//
 
 std::string Expression::getTag(){
   return tag;
@@ -53,9 +66,65 @@ bool isAssociative(){
   return associative;
 }
 
-vector<string> getDistributeOver(){
-  return distributes_over;
+bool isVariable(){
+  return variable;
 }
 
+bool isRational(){
+  return tag == FunctionTags.VARIABLE;
+}
 
-#endif
+bool isUndefined(){
+  return undefined;
+}
+
+int size(){
+  return operands.size();
+}
+
+//virtual Rational getValue() = 0;
+
+//virtual string get_name() = 0;
+
+virtual std::string to_string(){
+  std:: string to_return = "";
+  for(Expression*& operand : operands){
+    to_return += " " + operand.to_string() + " ";
+  }
+  return "( " + FunctionTags[getTag()] + to_return + " )";
+}
+
+virtual Expression& operator=(const Expression & other){
+  if(this != other){
+    _delete_operands();
+    
+  }
+}
+
+virtual bool operator==(const Expression& lhs, const Expression& rhs);
+virtual bool operator!=(const Expression& lhs, const Expresion& rhs);
+virtual bool operator< (const Expression& lhs, const Expression& rhs);
+virtual bool operator> (const Expression& lhs, const Expression& rhs);
+virtual bool operator<=(const Expression& lhs, const Expression& rhs);
+virtual bool operator>=(const Expression& lhs, const Expression& rhs);
+
+virtual   Expression* operator[](int pos);
+
+
+//
+// CAS functions
+//
+
+Expression * simplify() = 0;
+
+
+//
+// Helper Functions
+//
+void _delete_operands(){
+  for(Expression*& operand : operands){
+    delete operand; // should recurively delete all operands in our Expression Tree
+    operand = 0; // set pointer to null
+  }
+  operands.clear();
+}

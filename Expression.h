@@ -4,40 +4,40 @@
 #include <vector>
 #include <string>
 #include <map>
+
 #include "Rational.h"
 
+/**
+  NOTE: this is an Abstract class
+*/
 class Expression{
   private:
     std::string tag; // A string denoting the type of expression
     int max_operands;
+    std::string tag;
     int min_operands;
-    Expression (*operator)(std::vector<*Expression>); // function pointer
     bool communative;
     bool associative;
-    std::vector<std::string> distributes_over; // list of tags
-  public:
-    //
-    // Variables
-    //
+    bool undefined;
+    Rational value;
+    std::string var_name;
     std::vector<*Expression> operands;
 
-    Rational value;
-
-    std::string var_name;
-
+  public:
     ///
     /// CONSTRUCTOR
     ///
     Expression(
-      std::string tag_string
-      max_operands_int,
-      min_operands_int,
-      Expression (*operator_ptr)(std::vector<*Expression>),
+      int max_operands_int,
+      int min_operands_int,
       bool communative_bool,
       bool associative_bool,
-      std::vector<std::string> distributes_over_vector,
+      Rational value_rational,
+      std::string var_name_string,
       std::vector<*Expression> operands_vector,
     );
+
+    Expression(const Expression & E); // copy constructor
 
     //
     // Destructor
@@ -79,11 +79,13 @@ class Expression{
       @return: boolean value indicating if current expression is a RATIONAL
     */
     bool isRational();
+
     /**
       @params: None
-      @return: return vector of tags the current operation distrubutes over
+      @return boolean indicating if current expression is undefined
+          ie 1/0
     */
-    vector<string> getDistributeOver();
+    bool isUndefined();
 
     /**
       @params: None
@@ -97,7 +99,7 @@ class Expression{
       //NOTE: should only be used if tag = RATIONAL
       will raise and exception if above condition is not met
     */
-    Rational getValue();
+    virtual Rational getValue() = 0;
 
     /**
       @params: None
@@ -105,7 +107,14 @@ class Expression{
       //NOTE: should only be used if tag = VARIABLE
       will raise and exception if the above condition is not met
     */
-    string get_name();
+    virtual string get_name() = 0;
+
+
+    /**
+      @params: None
+      @return: returns a string representation of current expression
+    */
+    virtual std::string to_string();
 
     //
     // Setters
@@ -116,18 +125,36 @@ class Expression{
     //
 
   // Assignment / mutable operators
-  Expression& operator=(const Expression & other);
+  virtual Expression& operator=(const Expression & other);
 
   // Relational Operators
-  bool operator==(const Expression& lhs, const Expression& rhs);
-  bool operator!=(const Expression& lhs, const Expresion& rhs);
-  bool operator< (const Expression& lhs, const Expression& rhs);
-  bool operator> (const Expression& lhs, const Expression& rhs);
-  bool operator<=(const Expression& lhs, const Expression& rhs);
-  bool operator>=(const Expression& lhs, const Expression& rhs);
+  virtual bool operator==(const Expression& lhs, const Expression& rhs);
+  virtual bool operator!=(const Expression& lhs, const Expresion& rhs);
+  virtual bool operator< (const Expression& lhs, const Expression& rhs);
+  virtual bool operator> (const Expression& lhs, const Expression& rhs);
+  virtual bool operator<=(const Expression& lhs, const Expression& rhs);
+  virtual bool operator>=(const Expression& lhs, const Expression& rhs);
 
-  Expression* operator[](int pos);
+  // access operator, basically give us access to
+  virtual   Expression* operator[](int pos);
 
+
+  //
+  // CAS functions
+  //
+
+  Expression * simplify() = 0;
+
+
+  //
+  // Helper Functions;
+  //
+
+  // TODO: might want to make this a private member
+  void _delete_operands();
+
+  void _deep_copy_operands(const Expression & other);
+  
 };
 
 #endif
