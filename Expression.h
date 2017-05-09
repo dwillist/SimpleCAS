@@ -54,44 +54,44 @@ class Expression{
       @return: returns tag representing the operation this expression uses
                such tags are defined in FunctionTags.h
     */
-    std::string getTag();
+    std::string getTag() const;
 
     /**
       @params: None
       @return: boolean telling if expression is a communative operation
     */
-    bool isCommunative();
+    bool isCommunative() const;
 
     /**
       @params: None
       @return: boolean telling if expression uses an associative operation
     */
-    bool isAssociative();
+    bool isAssociative() const;
 
     /**
       @params: None;
       @return: boolean value indicating if current expression is a VARIABLE
     */
-    bool isVariable();
+    bool isVariable() const;
 
     /**
       @params: None;
       @return: boolean value indicating if current expression is a RATIONAL
     */
-    bool isRational();
+    bool isRational() const;
 
     /**
       @params: None
       @return boolean indicating if current expression is undefined
           ie 1/0
     */
-    bool isUndefined();
+    bool isUndefined() const;
 
     /**
       @params: None
       @return: integer indicating size of operands vector
     */
-    int size();
+    int size() const;
 
     /**
       @params: None
@@ -99,7 +99,7 @@ class Expression{
       //NOTE: should only be used if tag = RATIONAL
       will raise and exception if above condition is not met
     */
-    virtual Rational getValue() = 0;
+    virtual Rational getValue() const = 0;
 
     /**
       @params: None
@@ -107,18 +107,32 @@ class Expression{
       //NOTE: should only be used if tag = VARIABLE
       will raise and exception if the above condition is not met
     */
-    virtual string get_name() = 0;
+    virtual string get_name() const = 0;
 
 
     /**
       @params: None
       @return: returns a string representation of current expression
     */
-    virtual std::string to_string();
+    virtual std::string to_string() const;
 
     //
     // Setters
     //
+
+    virtual void swap(Expression & other) throw(){
+      using std::swap;
+      swap(tag,other.tag);
+      swap(max_operands,other.max_operands);
+      swap(tag,other.tag);
+      swap(min_operands,other.min_operands);
+      swap(communative,other.communative);
+      swap(associative,other.associative);
+      swap(undefined,other.undefined);
+      swap(value,other.value);
+      swap(var_name,other.var_name);
+      swap(operands,other.operands);
+    }
 
     //
     // Operators
@@ -128,12 +142,12 @@ class Expression{
   virtual Expression& operator=(const Expression & other);
 
   // Relational Operators
-  virtual bool operator==(const Expression& lhs, const Expression& rhs);
-  virtual bool operator!=(const Expression& lhs, const Expresion& rhs);
-  virtual bool operator< (const Expression& lhs, const Expression& rhs);
-  virtual bool operator> (const Expression& lhs, const Expression& rhs);
-  virtual bool operator<=(const Expression& lhs, const Expression& rhs);
-  virtual bool operator>=(const Expression& lhs, const Expression& rhs);
+  virtual bool operator==(const Expression& lhs, const Expression& rhs) const;
+  virtual bool operator!=(const Expression& lhs, const Expresion& rhs) const;
+  virtual bool operator< (const Expression& lhs, const Expression& rhs) const;
+  virtual bool operator> (const Expression& lhs, const Expression& rhs) const;
+  virtual bool operator<=(const Expression& lhs, const Expression& rhs) const;
+  virtual bool operator>=(const Expression& lhs, const Expression& rhs) const;
 
   // access operator, basically give us access to
   virtual   Expression* operator[](int pos);
@@ -154,7 +168,7 @@ class Expression{
   void _delete_operands();
 
   void _deep_copy_operands(const Expression & other);
-  
+
 };
 
 #endif

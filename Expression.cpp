@@ -1,6 +1,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <stdexcept>
 
 #include "Rational.h"
 #include "FunctionTags.h"
@@ -13,9 +14,9 @@ Expression::Expression(
     int min_operands_int,
     bool communative_bool,
     bool associative_bool,
-    Rational value_rational,
-    std::string var_name_string,
-    std::vector<*Expression> operands_vector,
+    Rational value_rational = Rational(),
+    std::string var_name_string = "",
+    std::vector<*Expression> operands_vector = std::vector<*Expression>(),
   ) : max_operands(max_operands_int),
       min_operands(min_operands_int),
       communative(communative_bool),
@@ -23,9 +24,13 @@ Expression::Expression(
       value(value_rational),
       var_name(var_name_string),
       operands(operands_vector)
-      {}
+      {
+        if(size() > max_operands || size < min_operands){
+          throw std::exception("invalid number of arguments to Expression constructor");
+        }
+      }
 
-Expression(const Expression & other){
+Expression::Expression(const Expression & other){
   if(*this != other){
     max_operands = E.max_operands;
     min_operands = E.min_operands;
@@ -58,27 +63,27 @@ std::string Expression::getTag(){
   return tag;
 }
 
-bool isCommunative(){
+bool Expression::isCommunative(){
   return communative;
 }
 
-bool isAssociative(){
+bool Expression::isAssociative(){
   return associative;
 }
 
-bool isVariable(){
-  return variable;
+bool Expression::isVariable(){
+  return getTag() == FunctionTags::VARIABLE;
 }
 
-bool isRational(){
-  return tag == FunctionTags.VARIABLE;
+bool Expression::isRational(){
+  return getTag() == FunctionTags::RATIONAL;
 }
 
-bool isUndefined(){
+bool Expression::isUndefined(){
   return undefined;
 }
 
-int size(){
+int Expression::size(){
   return operands.size();
 }
 
@@ -86,7 +91,11 @@ int size(){
 
 //virtual string get_name() = 0;
 
-virtual std::string to_string(){
+//
+// Setters
+//
+
+virtual std::string Expression::to_string(){
   std:: string to_return = "";
   for(Expression*& operand : operands){
     to_return += " " + operand.to_string() + " ";
@@ -94,21 +103,74 @@ virtual std::string to_string(){
   return "( " + FunctionTags[getTag()] + to_return + " )";
 }
 
-virtual Expression& operator=(const Expression & other){
-  if(this != other){
-    _delete_operands();
-    
-  }
+void Expression::swap(Expression & other) throw(){
+  using std::swap;
+  swap(tag,other.tag);
+  swap(max_operands,other.max_operands);
+  swap(tag,other.tag);
+  swap(min_operands,other.min_operands);
+  swap(communative,other.communative);
+  swap(associative,other.associative);
+  swap(undefined,other.undefined);
+  swap(value,other.value);
+  swap(var_name,other.var_name);
+  swap(operands,other.operands);
 }
 
-virtual bool operator==(const Expression& lhs, const Expression& rhs);
-virtual bool operator!=(const Expression& lhs, const Expresion& rhs);
-virtual bool operator< (const Expression& lhs, const Expression& rhs);
-virtual bool operator> (const Expression& lhs, const Expression& rhs);
-virtual bool operator<=(const Expression& lhs, const Expression& rhs);
-virtual bool operator>=(const Expression& lhs, const Expression& rhs);
+//
+// Operators
+//
 
-virtual   Expression* operator[](int pos);
+
+// implementation makes use of Copy-swap idiom for assignment
+virtual Expression::Expression& operator=(const Expression & other){
+  other.swap(*this);
+  return *this;
+}
+
+// NOTE: all compairison operators assume that both lhs, and rhs are in cononical form
+// so they are equivalent if and only if their syntax trees are equivalent.
+// this is not alwasy a valid assumption.
+
+// assumes both sides have been simplified to a cononical form
+virtual bool Expression::operator==(const Expression& lhs, const Expression& rhs){
+  if(lhs.getTag() == rhs.getTag() && lhs.size() == rhs.size()){
+    for(int i = 0; i < lhs.size(); ++i){
+      if(*lhs[i] != *rhs[i]){ //
+        return false;
+      }
+    }
+    return true;
+  }
+  return false;
+}
+virtual bool Expression::operator!=(const Expression& lhs, const Expresion& rhs){
+  return !(lhs == rhs);
+}
+virtual bool Expression::operator< (const Expression& lhs, const Expression& rhs){
+  int lhs_prec = FunctionTags::precidence_map[lhs.getTag()];
+  int rhs_prec = FunctionTags::precidence_map[rhs.getTag()];
+  if lhs_prec == rhs_prec{ //should work
+    return std::less(lhs.operator.begin(),lhs.operator.end(),
+                 rhs.operator.begin(),rhs.operator.end(),
+                 [](const Expression*new_lhs,const Expression*new_rhs){*new_lhs < *new_rhs;});
+  }
+  return lhs_prec < rhs_prec;
+}
+
+virtual bool Expression::operator> (const Expression& lhs, const Expression& rhs){
+  return !(lhs < rhs) && (lhs != rhs)
+}
+virtual bool Expression::operator<=(const Expression& lhs, const Expression& rhs){
+  return (lhs < rhs) || (lhs == rhs);
+}
+virtual bool Expression::operator>=(const Expression& lhs, const Expression& rhs){
+  return (lhs > rhs) || (lhs == rhs);
+}
+
+virtual Expression* Expression::operator[](int pos){
+  return operands[pos];
+}
 
 
 //

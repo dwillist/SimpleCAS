@@ -12,8 +12,8 @@ class RationalExpression : public Expression{
     //
     // CONSTRUCTORS
     //
-    RationalExpression(Rational R);
-    RationalExpression(const RationalExpression & R);
+    RationalExpression(const Rational & R);
+    RationalExpression(const Expression & R);
 
     //
     // Dtor
@@ -23,12 +23,12 @@ class RationalExpression : public Expression{
     //overwritten functions
 
     // see base class comments
-    virtual Rational getValue();
+    virtual Rational getValue() const;
 
     // see base class comments
-    virtual std::string get_name();
+    virtual std::string get_name() const;
 
-    virtual std::string to_string();
+    virtual std::string to_string() const;
 
     //
     // Setters
@@ -50,7 +50,7 @@ class RationalExpression : public Expression{
     virtual bool operator>=(const Expression& lhs, const Expression& rhs);
 
     // access operator, basically give us access to
-    virtual   Expression* operator[](int pos);
+    virtual Expression* operator[](int pos);
 
 
     //

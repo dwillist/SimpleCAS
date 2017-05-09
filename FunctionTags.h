@@ -21,7 +21,17 @@ namespace FunctionTags{
                                   {RATIONAL,"#"}
                                 };
 
-  enum PRECIDENCE {RATIONAL,VARIABLE,SUM,PRODUCT,EXPONENT,}
+  enum PRECIDENCE {RATIONAL_PREC,VARIABLE_PREC,SUM_PREC,PRODUCT_PREC,EXPONENT_PREC}
+
+  std::map<std::string,std::string> precidence_map = {
+                                  {SUM, SUM_PREC}
+                                  {PRODUCT, PRODUCT_PREC},
+                                  {EXPONENT, EXPONENT_PREC},
+                                  {VARIABLE, VARIABLE_PREC},
+                                  {RATIONAL, RATIONAL_PREC}
+                                };
+
+
 }
 
 

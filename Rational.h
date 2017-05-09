@@ -2,6 +2,7 @@
 #define _RATIONAL_H_
 
 #include "BigInt.h";
+#include <string>
 
 class Rational{
 private:
@@ -56,6 +57,8 @@ public:
   bool isZero();
 
   bool isOne();
+
+  std::string to_string() const;
 
 };
 
