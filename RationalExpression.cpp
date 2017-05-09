@@ -43,16 +43,21 @@ virtual std::string to_string(){
 
 // Relational Operators
 virtual bool operator==(const Expression& lhs, const Expression& rhs){
-  return lhs.getTag() == rhs.getTag() // PICK UP HERE
+  return lhs.getTag() == rhs.getTag() && lhs.getValue() == rhs.getValue();
 }
-virtual bool operator!=(const Expression& lhs, const Expresion& rhs);
-virtual bool operator< (const Expression& lhs, const Expression& rhs);
-virtual bool operator> (const Expression& lhs, const Expression& rhs);
-virtual bool operator<=(const Expression& lhs, const Expression& rhs);
-virtual bool operator>=(const Expression& lhs, const Expression& rhs);
+//virtual bool operator!=(const Expression& lhs, const Expresion& rhs)
+virtual bool operator< (const Expression& lhs, const Expression& rhs){
+  int lhs_prec = FunctionTags::precidence_map[lhs.getTag()];
+  int rhs_prec = FunctionTags::precidence_map[rhs.getTag()];
+  if lhs_prec == rhs_prec{ //should work
+    return lhs.getValue() < rhs.getValue();
+  }
+}
 
 // access operator, basically give us access to
-virtual   Expression* operator[](int pos);
+virtual Expression* operator[](int pos){
+  throw std::exception("no operands to access[] for RationalExpression");
+}
 
 
 //
