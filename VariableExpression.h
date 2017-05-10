@@ -13,28 +13,18 @@ class VariableExpression : public Expression{
     // CONSTRUCTORS
     //
     VariableExpression(std::string name);
-    VariableExpression(const VariableExpression & V);
-
-    //
-    // Dtor
-    //
-    virtual ~VariableExpression();
 
     //
     // virtual functions
     //
 
     // See Base class comments
-    virtual Rational getValue();
+    virtual Rational getValue() const;
 
     // See Base class comments
-    virtual string get_name();
+    virtual string getName() const;
 
-    virtual std::string to_string();
-
-    //
-    // Setters
-    //
+    virtual std::string toString() const;
 
     //
     // Operators
@@ -44,12 +34,12 @@ class VariableExpression : public Expression{
     virtual Expression& operator=(const Expression & other);
 
     // Relational Operators
-    virtual bool operator==(const Expression& lhs, const Expression& rhs);
-    virtual bool operator!=(const Expression& lhs, const Expresion& rhs);
-    virtual bool operator< (const Expression& lhs, const Expression& rhs);
-    virtual bool operator> (const Expression& lhs, const Expression& rhs);
-    virtual bool operator<=(const Expression& lhs, const Expression& rhs);
-    virtual bool operator>=(const Expression& lhs, const Expression& rhs);
+    virtual bool operator==(const Expression& lhs, const Expression& rhs) const;
+    virtual bool operator!=(const Expression& lhs, const Expresion& rhs) const;
+    virtual bool operator< (const Expression& lhs, const Expression& rhs) const;
+    virtual bool operator> (const Expression& lhs, const Expression& rhs) const;
+    virtual bool operator<=(const Expression& lhs, const Expression& rhs) const;
+    virtual bool operator>=(const Expression& lhs, const Expression& rhs) const;
 
     // access operator, basically give us access to
     virtual   Expression* operator[](int pos);

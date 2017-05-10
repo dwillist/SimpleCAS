@@ -58,7 +58,7 @@ public:
 
   bool isOne();
 
-  std::string to_string() const;
+  std::string toString() const;
 
 };
 

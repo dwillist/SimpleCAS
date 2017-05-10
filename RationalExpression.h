@@ -13,12 +13,6 @@ class RationalExpression : public Expression{
     // CONSTRUCTORS
     //
     RationalExpression(const Rational & R);
-    RationalExpression(const Expression & R);
-
-    //
-    // Dtor
-    //
-    virtual ~RationalExpression();
 
     //overwritten functions
 
@@ -43,11 +37,7 @@ class RationalExpression : public Expression{
 
     // Relational Operators
     virtual bool operator==(const Expression& lhs, const Expression& rhs);
-    virtual bool operator!=(const Expression& lhs, const Expresion& rhs);
     virtual bool operator< (const Expression& lhs, const Expression& rhs);
-    virtual bool operator> (const Expression& lhs, const Expression& rhs);
-    virtual bool operator<=(const Expression& lhs, const Expression& rhs);
-    virtual bool operator>=(const Expression& lhs, const Expression& rhs);
 
     // access operator, basically give us access to
     virtual Expression* operator[](int pos);

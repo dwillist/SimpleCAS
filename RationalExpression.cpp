@@ -9,13 +9,7 @@
 //
 RationalExpression(const Rational & R) :
   Expression(0,0,false,false,R) // rest of args we let be default see Expression constructor
-
-}
-
-//
-// Dtor
-//
-virtual ~RationalExpression();
+  {}
 
 //overwritten functions
 
@@ -25,11 +19,12 @@ virtual Rational getValue(){
 }
 
 // see base class comments
-virtual std::string get_name(){
+virtual std::string getName(){
   throw std::exception("Rational expression has no name")
+  return std::string();
 }
 
-virtual std::string to_string(){
+virtual std::string toString(){
   return value.to_string(); // uses Rational interface to get string.
 }
 
@@ -57,6 +52,7 @@ virtual bool operator< (const Expression& lhs, const Expression& rhs){
 // access operator, basically give us access to
 virtual Expression* operator[](int pos){
   throw std::exception("no operands to access[] for RationalExpression");
+  return 0;
 }
 
 

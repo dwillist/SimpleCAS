@@ -107,14 +107,14 @@ class Expression{
       //NOTE: should only be used if tag = VARIABLE
       will raise and exception if the above condition is not met
     */
-    virtual string get_name() const = 0;
+    virtual string getName() const = 0;
 
 
     /**
       @params: None
       @return: returns a string representation of current expression
     */
-    virtual std::string to_string() const;
+    virtual std::string toString() const;
 
     //
     // Setters

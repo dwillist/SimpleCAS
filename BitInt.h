@@ -1,26 +1,34 @@
 #ifndef _BIG_INT_H_
 #define _BIG_INT_H_
 
-#include <vector>
+#include <bitset>
+#include <string>
 
 class BigInt{
 private:
-  // note that value[0] is th 1's place of our number
-  std::vector<int> value;
-  bool neg;
+  const int STARTSIZE = 64;
+  const int ADJUSTFACTOR = 2;
+  // a little-endian 1's complement representation of our big integer.
+  std::<bitset> binary_rep;
+  // TODO: implement below initialization method
+  //void _initialize(const std::string & s,base = 10);
+  void increaseSize();
+  bool full();
 public:
   //
   // Ctors
   //
-  BigInt(const string & s);
-  BigInt(const int i);
-  BigInt(const long l);
+
+  //TODO: implement below constructor for arbitrary based strings
+  //BigInt(const std::string & s,base = 10);
+  BigInt(int i);
+  BigInt(long long l);
   BigInt(const BigInt & B); // copy constructor
 
   //
   //Dtor
   //
-  virtual ~BigInt();
+  // default Dtor works fine for us;
 
   //
   // Getters
@@ -33,10 +41,17 @@ public:
   int getKthDigit(int k);
 
   /**
+    TODO: implement below method
     @params: None
     @return: string representation of our big integer
   */
-  string to_string();
+  //std::string toBaseNString(int n = 10);
+
+  /**
+    @params: None
+    @return: size of binary representation of our number
+  */
+  long long size();
 
   //
   // Operators
@@ -78,6 +93,12 @@ public:
   BigInt nth_root(long long radicand);
 
   BigInt sqrt();
+
+  void swap(BigInt & other);
+
+  _raw_add(BigInt & other const);
+
+  _raw_subtract(BigInt & other const);
 
 
 };
