@@ -7,13 +7,53 @@
 class BigInt{
 private:
   const int STARTSIZE = 64;
-  const int ADJUSTFACTOR = 2;
+
   // a little-endian 1's complement representation of our big integer.
-  std::<bitset> binary_rep;
+  // we use a vector of bools and let the compiler
+  std::vector<bool> binary_rep;
   // TODO: implement below initialization method
   //void _initialize(const std::string & s,base = 10);
-  void increaseSize();
+
+  /**
+    @params: bits_to_add is number of bits to add starting after the most
+             significant bit
+    @return: None
+      - this increases the size of our representation to final_size by appending
+      0's (for positive) or 1's (for negative) on to the end of our binary_rep
+  */
+  void increaseSize(int bits_to_add);
+
+  /**
+    @params: bits_to_remove is number of bits to remove starting from most
+             significant bit
+    @return: None
+      - this decreases the size of our representation by removing excess 0's (for positive)
+      or 1's (for negative) on to the end of our binary_rep
+  */
+  void decreaseSize(int bits_to_remove);
+
+  /**
+    @params: integer indicating final number of bits in our final binary representation
+    @return: boolean value indicating weather or not current binary representation is
+             the largest (positive or negative) possible with current number of bits
+  */
   bool full();
+
+  /**
+    @params: None
+    @return: boolean value indicating if half of our current binary representation
+             is just preceeding 0's(for positive) or 1's(for negative)
+  */
+  bool halfEmpty();
+
+  /**
+    @params: None
+    @return: None
+        - flips all bits and adds 1 to negate current binary representation.
+  */
+  void negate();
+
+
 public:
   //
   // Ctors
@@ -48,10 +88,23 @@ public:
   //std::string toBaseNString(int n = 10);
 
   /**
+    @params: boolean indicating if we want our final output to be big endian
+    @return: binary string representing the value of this BigInt in little-endian or
+             big_endian form
+  */
+  std::string toString(bool big_endian = true);
+
+  /**
     @params: None
     @return: size of binary representation of our number
   */
   long long size();
+
+  /**
+    @params: None
+    @return: weather the current BigInt < 0
+  */
+  bool negative();
 
   //
   // Operators
