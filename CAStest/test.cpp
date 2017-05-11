@@ -1,28 +1,27 @@
 #include <cstdlib>
 #include <cstdio>
 #include <vector>
+#include <string>
 
-class testClass{
-public:
-  int value;
-  testClass(int v){
-    value = v;
+void printV(std::vector<bool> & B){
+  for(int i = 0; i < B.size(); ++i){
+    if(B[i]){
+      printf("1");
+    }
+    else{
+      printf("0");
+    }
   }
-};
+  printf("\n");
+}
 
-int function(testClass c){
-  printf("called by value\n");
-  return c.value;
-}
-int function(testClass & c){
-  printf("called by reference\n");
-  return c.value;
-}
 
 int main(){
-  int input = 5;
-  testClass t(7);
-  int ret_val1 = function(input);
-  int ret_val2 = function(t);
-  printf("%d %d\n",ret_val1,ret_val2);
+  std::vector<bool> B = {0,1,1,0};
+  printf("pre flip\n");
+  printV(B);
+  B.flip();
+  printf("post flip\n");
+  printV(B);
+
 }
