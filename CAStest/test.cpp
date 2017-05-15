@@ -15,13 +15,17 @@ void printV(std::vector<bool> & B){
   printf("\n");
 }
 
-
 int main(){
+  /*
   std::vector<bool> B = {0,1,1,0};
   printf("pre flip\n");
   printV(B);
   B.flip();
   printf("post flip\n");
   printV(B);
-
+  */
+  bool a = true;
+  bool b = true;
+  bool c = (a ^ b);
+  printf("%s", c ? "true" : "false");
 }

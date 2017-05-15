@@ -24,6 +24,15 @@ private:
   void increaseSize(int bits_to_add);
 
   /**
+    @params: total_size is a positive int denoting new size of binary_rep
+    @return: None
+      - if total size is larger than current size extend our binary_rep according to
+        its sign( 1's for negative 0's for positive)
+      -if less then this just chops of most significant bits untill we reach total_size
+  */
+  void setSize(int total_size);
+
+  /**
     @params: bits_to_remove is number of bits to remove starting from most
              significant bit
     @return: None
@@ -59,9 +68,10 @@ public:
   // Ctors
   //
 
+  BigInt();
+  BigInt(std::vector<bool> & bin_rep);
   //TODO: implement below constructor for arbitrary based strings
   //BigInt(const std::string & s,base = 10);
-  BigInt(int i);
   BigInt(long long l);
   BigInt(const BigInt & B); // copy constructor
 
@@ -78,7 +88,7 @@ public:
     @params: position of digit we want to recieve, 0 -> 1's place 1 -> 10's,...
     @return: digit in kth position
   */
-  int getKthDigit(int k);
+  int getKthDigit(std::size_t k) const;
 
   /**
     TODO: implement below method
@@ -92,23 +102,50 @@ public:
     @return: binary string representing the value of this BigInt in little-endian or
              big_endian form
   */
-  std::string toString(bool big_endian = true);
+  std::string toString(bool big_endian = true) const;
 
   /**
     @params: None
     @return: size of binary representation of our number
   */
-  long long size();
+  long long size() const;
 
   /**
     @params: None
     @return: weather the current BigInt < 0
   */
-  bool negative();
+  bool negative() const;
+
+  //
+  //Setters
+  //
+
+  /**
+    params: int position of digit to be changed
+      bool value (false -> 0, true -> 1) of new value of kth digit
+    return: None
+  */
+  void setKthDigit(std::size_t k,bool new_value);
+
+
+  /**
+    params: None
+    return: None
+      -sets all bits of number to zero without resizing
+  */
+  void zero() const;
+
+  /**
+    params: None
+    return: a long long integer
+  */
+  long long toLlong() const;
 
   //
   // Operators
   //
+
+
 
   // Assignment / mutable operators
   BigInt& operator=(const BigInt & other);
@@ -132,20 +169,18 @@ public:
   BigInt operator-(const BigInt& lhs, const BigInt & rhs);
   BigInt operator*(const BigInt& lhs, const BigInt & rhs);
   BigInt operator/(const BigInt& lhs, const BigInt & rhs);
+  BigInt operator%(const BigInt& lhs, const BigInt & rhs);
+  BigInt operator-(const BigInt lhs); // Unary minus
 
-  BigInt rem(const BigInt & divisor);
-  BigInt rem(int divisor);
-  BigInt rem(long long divisor);
+  // binary operators that can be used on integers
 
-  BigInt gcd(const BigInt & other);
-  BigInt gcd(int other);
-  BigInt gcd(long long other);
+  BigInt operator&(const BigInt &lhs, const BigInt &rhs); // Bitwise and
+  BigInt operator~(const BigInt &lhs, const BigInt &rhs); // Bitwise complement
+  BigInt operator^(const BigInt &lhs, const BigInt &rhs); // Bitwise exclusive or
+  BigInt operator|(const BigInt &lhs, const BigInt &rhs); // Bitwise or
+  BigInt operator<<(const BigInt &lhs, unsigned int shift); // Left shift
+  BigInt operator>>(const BigInt &lhs, unsigned int shift); // Right shift
 
-  BigInt nth_root(const BigInt & radicand);
-  BigInt nth_root(int radicand);
-  BigInt nth_root(long long radicand);
-
-  BigInt sqrt();
 
   void swap(BigInt & other);
 
@@ -155,6 +190,28 @@ public:
 
 
 };
+
+//
+// Non-class related functions
+//
+
+namespace BigIntFuntions{
+  /**
+    @params: two BigInts a dividend and divisor
+    @return: a pair of Bigints of the form pair<quotent,rem>
+      - Note: this follows the convention both the quotent and remainder having
+        the same sign.
+  */
+  std::pair<BigInt,BigInt> divmod(const BigInt& dividend, const BigInt& divisor);
+
+  //BigInt extended_gcd(BigInt lhs,BigInt rhs);
+
+  //BigInt gcd(const BigInt & lhs,const BigInt & rhs);
+
+  //BigInt nth_root(const BigInt & radicand, unsigned int index);
+
+  //BigInt sqrt(const BigInt & to_root);
+}
 
 
 #endif

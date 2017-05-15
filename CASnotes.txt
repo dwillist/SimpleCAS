@@ -3,7 +3,8 @@ TODO:
 1-writeBigIntClass
 2-Finish Rational class
 3-Write Evaluations Functions
-4- SERIOUSLY test Expression's <, and == operators really need to avoid any type slicing... 
+4- SERIOUSLY test Expression's <, and == operators really need to avoid any type slicing...
+5- Test functions of BigInt class
 
 
 NOTE:
