@@ -1,8 +1,11 @@
 #ifndef _SUM_EXPRESSION_H_
 #define _SUM_EXPRESSION_H_
 
+#include <boost/multiprecision/cpp_int.hpp>
+#include <string>
+#include <vector>
+
 #include "Expression.h"
-#include "Rational.h"
 
 class SumExpression : public Expression{
   public:
@@ -12,28 +15,19 @@ class SumExpression : public Expression{
     //
 
     SumExpression(std::vector<Expression * > sum_operands);
-    SumExpression(const SumExpression & R); // Copy constuctor
-    SumExpression(const Expression & E); // conversion of arbitrary expression to sum
-
-    //
-    // Dtor
-    //
-    virtual ~VariableExpression();
-
-    //
-    // Virtual functions
-    //
+    SumExpression(const Expression & E);
 
     // See Base class comments
-    virtual Rational getValue();
+    //virtual boost::multiprecision::cpp_rational getValue() const;
 
     // See Base class comments
-    virtual string get_name();
+    //virtual std::string getName() const;
 
     //
     // CAS functions
     //
-    Expression * simplify();
+
+    virtual Expression * simplify();
 
 };
 

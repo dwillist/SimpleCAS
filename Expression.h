@@ -10,8 +10,8 @@
 class Expression{
 protected:
     std::string tag; // A string denoting the type of expression
-    int max_operands;
-    int min_operands;
+    std::size_t max_operands;
+    std::size_t min_operands;
     bool communative;
     bool associative;
     bool undefined;
@@ -25,8 +25,8 @@ protected:
     ///
     Expression(
       std::string tag_string,
-      int max_operands_int,
-      int min_operands_int,
+      std::size_t max_operands_size_t,
+      std::size_t min_operands_size_t,
       bool communative_bool,
       bool associative_bool,
       bool undefined_bool,

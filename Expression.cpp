@@ -13,8 +13,8 @@
 
 Expression::Expression(
     std::string tag_string, // A string denoting the type of expression
-    int max_operands_int,
-    int min_operands_int,
+    std::size_t max_operands_size_t,
+    std::size_t min_operands_size_t,
     bool communative_bool,
     bool associative_bool,
     bool undefined_bool,
@@ -23,8 +23,8 @@ Expression::Expression(
     std::vector<Expression*> operands_vector
   ) :
       tag(tag_string),
-      max_operands(max_operands_int),
-      min_operands(min_operands_int),
+      max_operands(max_operands_size_t),
+      min_operands(min_operands_size_t),
       communative(communative_bool),
       associative(associative_bool),
       undefined(undefined_bool),
@@ -111,9 +111,9 @@ std::string Expression::getName() const{
 //
 
 std::string Expression::toString() const{
-  std:: string to_return = "";
+  std::string to_return = "";
   for(Expression* operand : operands){
-    to_return += " " + operand->toString() + " ";
+    to_return += " " + operand->toString();
   }
   return "( " + FunctionTags::tag_to_print[getTag()] + to_return + " )";
 }

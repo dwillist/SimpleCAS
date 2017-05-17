@@ -2,9 +2,9 @@
 #define _VARIABLE_EXPRESSION_H
 
 #include <string>
+#include <boost/multiprecision/cpp_int.hpp>
 
 #include "Expression.h"
-#include "Rational.h"
 
 class VariableExpression : public Expression{
   public:
@@ -19,10 +19,10 @@ class VariableExpression : public Expression{
     //
 
     // See Base class comments
-    virtual Rational getValue() const;
+    virtual boost::multiprecision::cpp_rational getValue() const;
 
     // See Base class comments
-    virtual string getName() const;
+    virtual std::string getName() const;
 
     virtual std::string toString() const;
 
@@ -34,12 +34,8 @@ class VariableExpression : public Expression{
     virtual Expression& operator=(const Expression & other);
 
     // Relational Operators
-    virtual bool operator==(const Expression& lhs, const Expression& rhs) const;
-    virtual bool operator!=(const Expression& lhs, const Expresion& rhs) const;
-    virtual bool operator< (const Expression& lhs, const Expression& rhs) const;
-    virtual bool operator> (const Expression& lhs, const Expression& rhs) const;
-    virtual bool operator<=(const Expression& lhs, const Expression& rhs) const;
-    virtual bool operator>=(const Expression& lhs, const Expression& rhs) const;
+    virtual bool operator==(const Expression& rhs) const;
+    virtual bool operator< (const Expression& rhs) const;
 
     // access operator, basically give us access to
     virtual   Expression* operator[](int pos);
@@ -49,7 +45,7 @@ class VariableExpression : public Expression{
     // CAS functions
     //
 
-    Expression * simplify;
+    virtual Expression * simplify();
 };
 
 

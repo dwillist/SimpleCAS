@@ -1,16 +1,16 @@
-
 #include <string>
 #include <stdexcept>
+#include <boost/multiprecision/cpp_int.hpp>
 
+#include "VariableExpression.h"
 #include "Expression.h"
-#include "Rational.h"
 #include "FunctionTags.h"
 
 //
 // CONSTRUCTORS
 //
-VariableExpression(std::string name) :
-  Expression(0,0,false,false,Rational(),name)
+VariableExpression::VariableExpression(std::string name) :
+  Expression(FunctionTags::VARIABLE,0,0,false,false,false,boost::multiprecision::cpp_rational(),name)
   {}
 
 
@@ -19,17 +19,17 @@ VariableExpression(std::string name) :
 //
 
 // See Base class comments
-virtual Rational getValue(){
-  throw std::exception("VariableExpression has no value to get")
+boost::multiprecision::cpp_rational VariableExpression::getValue() const{
+  throw "VariableExpression has no value to get";
 }
 
 // See Base class comments
-virtual string getName(){
+std::string VariableExpression::getName() const{
   return var_name;
 }
 
-virtual std::string toString(){
-  return get_name();
+std::string VariableExpression::toString() const{
+  return VariableExpression::getName();
 }
 
 //
@@ -40,21 +40,27 @@ virtual std::string toString(){
 // Operators
 //
 
-// Relational Operators
-virtual bool operator==(const Expression& lhs, const Expression& rhs){
-  return lhs.getTag() == rhs.getTag() && lhs.getName() == rhs.getName();
+Expression& VariableExpression::operator=(const Expression & other){
+  var_name = other.getName();
+  return *this;
 }
-virtual bool operator< (const Expression& lhs, const Expression& rhs){
-  int lhs_prec = FunctionTags::precidence_map[lhs.getTag()];
+
+// Relational Operators
+bool VariableExpression::operator==(const Expression& rhs) const{
+  return getTag() == rhs.getTag() && getName() == rhs.getName();
+}
+bool VariableExpression::operator< (const Expression& rhs) const{
+  int lhs_prec = FunctionTags::precidence_map[getTag()];
   int rhs_prec = FunctionTags::precidence_map[rhs.getTag()];
-  if lhs_prec == rhs_prec{
-    return lhs.getName() < rhs.getName();
+  if(lhs_prec == rhs_prec){
+    return getName() < rhs.getName();
   }
+  return lhs_prec < rhs_prec;
 }
 
 // access operator, basically give us access to
-virtual Expression* operator[](int pos){
-  throw std::exception("Variable expression has no operands to access[]");
+Expression* VariableExpression::operator[](int pos){
+  throw "Variable expression has no operands to access[]";
   return 0;
 }
 
@@ -63,6 +69,6 @@ virtual Expression* operator[](int pos){
 // CAS functions
 //
 
-Expression * simplify{
+Expression * VariableExpression::simplify(){
   return this;
 }

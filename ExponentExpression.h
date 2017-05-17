@@ -1,40 +1,29 @@
 #ifndef _EXPONENT_EXPRESSION_H_
 #define _EXPONENT_EXPRESSION_H_
 
+
+#include <boost/multiprecision/cpp_int.hpp>
+#include <string>
+#include <vector>
+
 #include "Expression.h"
-#include "Rational.h"
 
 class ExponentExpression : public Expression{
   public:
+
     //
     // CONSTRUCTORS
     //
 
-    ExponentExpression(std::vector<Expression * > product_operands);
-    ExponentExpression(const ExponentExpression & R); // Copy constuctor
-    ExponentExpression(const Expression & E); // conversion of arbitrary expression to sum
-
-    //
-    // Dtor
-    //
-    virtual ~ExponentExpression();
-
-    //
-    // Virtual functions
-    //
-
-    // See Base class comments
-    virtual Rational getValue();
-
-    // See Base class comments
-    virtual string get_name();
+    ExponentExpression(std::vector<Expression * > exponent_operands);
+    ExponentExpression(const Expression & E);
 
     //
     // CAS functions
     //
-    Expression * simplify();
+
+    virtual Expression * simplify();
 
 };
-
 
 #endif
