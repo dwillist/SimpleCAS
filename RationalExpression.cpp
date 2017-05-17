@@ -1,31 +1,36 @@
 #include <string>
 #include <stdexcept>
+#include <sstream>
 
+#include "RationalExpression.h"
 #include "Expression.h"
-#include "Rational.h"
+#include "FunctionTags.h"
+#include <boost/multiprecision/cpp_int.hpp>
 
 //
 // CONSTRUCTORS
 //
-RationalExpression(const Rational & R) :
-  Expression(0,0,false,false,R) // rest of args we let be default see Expression constructor
+RationalExpression::RationalExpression(boost::multiprecision::cpp_rational R) :
+  Expression(FunctionTags::RATIONAL,0,0,false,false,false,R) // rest of args we let be default see Expression constructor
   {}
 
 //overwritten functions
 
 // see base class comments
-virtual Rational getValue(){
+boost::multiprecision::cpp_rational RationalExpression::getValue() const{
   return value;
 }
 
 // see base class comments
-virtual std::string getName(){
-  throw std::exception("Rational expression has no name")
+std::string RationalExpression::getName() const{
+  throw "Rational expression has no name";
   return std::string();
 }
 
-virtual std::string toString(){
-  return value.to_string(); // uses Rational interface to get string.
+std::string RationalExpression::toString() const{
+  std::stringstream ss;
+  ss << getValue();
+  return ss.str();
 }
 
 //
@@ -36,22 +41,27 @@ virtual std::string toString(){
 // Operators
 //
 
+Expression& RationalExpression::operator=(const Expression & other){
+  value = other.getValue();
+  return *this;
+}
 // Relational Operators
-virtual bool operator==(const Expression& lhs, const Expression& rhs){
-  return lhs.getTag() == rhs.getTag() && lhs.getValue() == rhs.getValue();
+bool RationalExpression::operator==(const Expression& rhs) const{
+  return getTag() == rhs.getTag() && getValue() == rhs.getValue();
 }
 //virtual bool operator!=(const Expression& lhs, const Expresion& rhs)
-virtual bool operator< (const Expression& lhs, const Expression& rhs){
-  int lhs_prec = FunctionTags::precidence_map[lhs.getTag()];
+ bool RationalExpression::operator< (const Expression& rhs) const{
+  int lhs_prec = FunctionTags::precidence_map[getTag()];
   int rhs_prec = FunctionTags::precidence_map[rhs.getTag()];
-  if lhs_prec == rhs_prec{ //should work
-    return lhs.getValue() < rhs.getValue();
+  if(lhs_prec == rhs_prec){ //should work
+    return getValue() < rhs.getValue();
   }
+  return lhs_prec < rhs_prec;
 }
 
 // access operator, basically give us access to
-virtual Expression* operator[](int pos){
-  throw std::exception("no operands to access[] for RationalExpression");
+Expression* RationalExpression::operator[](int pos){
+  throw "no operands to access[] for RationalExpression";
   return 0;
 }
 
@@ -60,6 +70,6 @@ virtual Expression* operator[](int pos){
 // CAS functions
 //
 
-Expression * simplify(){
+ Expression * RationalExpression::simplify(){
   return this;
 }

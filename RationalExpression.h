@@ -2,9 +2,9 @@
 #define _RATIONAL_EXPRESSION_H
 
 #include <string>
+#include <boost/multiprecision/cpp_int.hpp>
 
 #include "Expression.h"
-#include "Rational.h"
 
 class RationalExpression : public Expression{
   public:
@@ -12,17 +12,17 @@ class RationalExpression : public Expression{
     //
     // CONSTRUCTORS
     //
-    RationalExpression(const Rational & R);
+    RationalExpression(boost::multiprecision::cpp_rational R);
 
     //overwritten functions
 
     // see base class comments
-    virtual Rational getValue() const;
+    virtual boost::multiprecision::cpp_rational getValue() const;
 
     // see base class comments
-    virtual std::string get_name() const;
+    virtual std::string getName() const;
 
-    virtual std::string to_string() const;
+    virtual std::string toString() const;
 
     //
     // Setters
@@ -36,8 +36,8 @@ class RationalExpression : public Expression{
     virtual Expression& operator=(const Expression & other);
 
     // Relational Operators
-    virtual bool operator==(const Expression& lhs, const Expression& rhs);
-    virtual bool operator< (const Expression& lhs, const Expression& rhs);
+    virtual bool operator==(const Expression& rhs) const;
+    virtual bool operator< (const Expression& rhs) const;
 
     // access operator, basically give us access to
     virtual Expression* operator[](int pos);
@@ -47,7 +47,7 @@ class RationalExpression : public Expression{
     // CAS functions
     //
 
-    Expression * simplify();
+    virtual Expression * simplify();
 
 };
 

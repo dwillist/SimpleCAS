@@ -4,37 +4,35 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <boost/multiprecision/cpp_int.hpp>
 
-#include "Rational.h"
 
-/**
-  NOTE: this is an Abstract class
-*/
 class Expression{
-  private:
+protected:
     std::string tag; // A string denoting the type of expression
     int max_operands;
-    std::string tag;
     int min_operands;
     bool communative;
     bool associative;
     bool undefined;
-    Rational value;
+    boost::multiprecision::cpp_rational value;
     std::string var_name;
-    std::vector<*Expression> operands;
+    std::vector<Expression*> operands;
 
   public:
     ///
     /// CONSTRUCTOR
     ///
     Expression(
+      std::string tag_string,
       int max_operands_int,
       int min_operands_int,
       bool communative_bool,
       bool associative_bool,
-      Rational value_rational,
-      std::string var_name_string,
-      std::vector<*Expression> operands_vector,
+      bool undefined_bool,
+      boost::multiprecision::cpp_rational value_rational = boost::multiprecision::cpp_rational(),
+      std::string var_name_string = std::string(),
+      std::vector<Expression*> operands_vector = std::vector<Expression*>()
     );
 
     Expression(const Expression & E); // copy constructor
@@ -99,7 +97,7 @@ class Expression{
       //NOTE: should only be used if tag = RATIONAL
       will raise and exception if above condition is not met
     */
-    virtual Rational getValue() const = 0;
+    virtual boost::multiprecision::cpp_rational getValue() const;
 
     /**
       @params: None
@@ -107,7 +105,7 @@ class Expression{
       //NOTE: should only be used if tag = VARIABLE
       will raise and exception if the above condition is not met
     */
-    virtual string getName() const = 0;
+    virtual std::string getName() const;
 
 
     /**
@@ -120,19 +118,7 @@ class Expression{
     // Setters
     //
 
-    virtual void swap(Expression & other) throw(){
-      using std::swap;
-      swap(tag,other.tag);
-      swap(max_operands,other.max_operands);
-      swap(tag,other.tag);
-      swap(min_operands,other.min_operands);
-      swap(communative,other.communative);
-      swap(associative,other.associative);
-      swap(undefined,other.undefined);
-      swap(value,other.value);
-      swap(var_name,other.var_name);
-      swap(operands,other.operands);
-    }
+    virtual void swap(Expression & other);
 
     //
     // Operators
@@ -142,22 +128,22 @@ class Expression{
   virtual Expression& operator=(const Expression & other);
 
   // Relational Operators
-  virtual bool operator==(const Expression& lhs, const Expression& rhs) const;
-  virtual bool operator!=(const Expression& lhs, const Expresion& rhs) const;
-  virtual bool operator< (const Expression& lhs, const Expression& rhs) const;
-  virtual bool operator> (const Expression& lhs, const Expression& rhs) const;
-  virtual bool operator<=(const Expression& lhs, const Expression& rhs) const;
-  virtual bool operator>=(const Expression& lhs, const Expression& rhs) const;
+  virtual bool operator==(const Expression& rhs) const;
+  virtual bool operator!=(const Expression& rhs) const;
+  virtual bool operator< (const Expression& rhs) const;
+  virtual bool operator> (const Expression& rhs) const;
+  virtual bool operator<=(const Expression& rhs) const;
+  virtual bool operator>=(const Expression& rhs) const;
 
   // access operator, basically give us access to
-  virtual   Expression* operator[](int pos);
+  virtual Expression* operator[](int pos);
 
 
   //
   // CAS functions
   //
 
-  Expression * simplify() = 0;
+  virtual Expression * simplify();
 
 
   //
@@ -166,8 +152,6 @@ class Expression{
 
   // TODO: might want to make this a private member
   void _delete_operands();
-
-  void _deep_copy_operands(const Expression & other);
 
 };
 

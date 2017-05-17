@@ -3,36 +3,19 @@
 
 #include <map>
 #include <string>
-#include "Expression.h"
 
 namespace FunctionTags{
-  std::string SUM = "SUM";
-  std::string PRODUCT = "PRODUCT";
-  std::string EXPONENT = "EXPONENT";
-  std::string DIFFERENCE = "DIFFERENCE"
-  std::string QUOTENT = "QUOTENT"
-  std::string VARIABLE = "VARIABLE";
-  std::string RATIONAL = "RATIONAL";
-  std::map<std::string,std::string> tag_to_print = {
-                                  {SUM, "+"}
-                                  {PRODUCT, "*"},
-                                  {EXPONENT,"^"},
-                                  {VARIABLE,"V"},
-                                  {RATIONAL,"#"}
-                                };
-
-  enum PRECIDENCE {RATIONAL_PREC,VARIABLE_PREC,SUM_PREC,PRODUCT_PREC,EXPONENT_PREC}
-
-  std::map<std::string,std::string> precidence_map = {
-                                  {SUM, SUM_PREC}
-                                  {PRODUCT, PRODUCT_PREC},
-                                  {EXPONENT, EXPONENT_PREC},
-                                  {VARIABLE, VARIABLE_PREC},
-                                  {RATIONAL, RATIONAL_PREC}
-                                };
-
-
-}
+  extern std::string SUM;
+  extern std::string PRODUCT;
+  extern std::string EXPONENT;
+  extern std::string DIFFERENCE;
+  extern std::string QUOTENT;
+  extern std::string VARIABLE;
+  extern std::string RATIONAL;
+  extern std::map<std::string,std::string> tag_to_print;
+  enum PRECIDENCE {RATIONAL_PREC,VARIABLE_PREC,SUM_PREC,PRODUCT_PREC,EXPONENT_PREC};
+  extern std::map<std::string,int> precidence_map;
+};
 
 
 

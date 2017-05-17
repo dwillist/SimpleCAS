@@ -1,12 +1,12 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <iostream>
 
-#include "BigInt.h"
+#include "RationalExpression.h"
 
 int main(){
-  BigInt a = BigInt(5);
-  BigInt b = BigInt(10);
-  long long to_print = (a + b).toLong();
-  printf("value : %lld\n",to_print);
+
+  RationalExpression R = RationalExpression(5);
+  std::cout << R.getValue() << std::endl;
 }

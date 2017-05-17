@@ -2,52 +2,61 @@
 #include <string>
 #include <map>
 #include <stdexcept>
+#include <boost/multiprecision/cpp_int.hpp>
 
-#include "Rational.h"
 #include "FunctionTags.h"
+#include "Expression.h"
 
 ///
 /// CONSTRUCTORS
 ///
+
 Expression::Expression(
+    std::string tag_string, // A string denoting the type of expression
     int max_operands_int,
     int min_operands_int,
     bool communative_bool,
     bool associative_bool,
-    Rational value_rational = Rational(),
-    std::string var_name_string = "",
-    std::vector<*Expression> operands_vector = std::vector<*Expression>(),
-  ) : max_operands(max_operands_int),
+    bool undefined_bool,
+    boost::multiprecision::cpp_rational value_rational,
+    std::string var_name_string,
+    std::vector<Expression*> operands_vector
+  ) :
+      tag(tag_string),
+      max_operands(max_operands_int),
       min_operands(min_operands_int),
       communative(communative_bool),
       associative(associative_bool),
+      undefined(undefined_bool),
       value(value_rational),
       var_name(var_name_string),
       operands(operands_vector)
       {
-        if(size() > max_operands || size < min_operands){
-          throw std::exception("invalid number of arguments to Expression constructor");
+        if(size() > max_operands || size() < min_operands){
+          throw "invalid number of arguments to Expression constructor";
         }
       }
 
 Expression::Expression(const Expression & other){
   if(*this != other){
-    max_operands = E.max_operands;
-    min_operands = E.min_operands;
-    communative = E.communative;
-    value = E.value;
-    var_name = E.var_name;
+    max_operands = other.max_operands;
+    min_operands = other.min_operands;
+    associative = other.associative;
+    communative = other.communative;
+    undefined = other.undefined;
+    value = other.value;
+    var_name = other.var_name;
     _delete_operands();
-    for(Expression*& operand : other.operands){
-      Expression to_add = (*operand); // will call copy constructor and recurse
-      operands.push_back(to_add)
+    for(Expression* operand : other.operands){
+      Expression * to_add = new Expression(*operand); // will call copy constructor and recurse
+      operands.push_back(to_add);
     }
   }
 }
 
 
-virtual Expression::~Expression(){
-  for( Expresion*& E : operands){
+Expression::~Expression(){
+  for( Expression*& E : operands){
     if( E != 0){
       delete E;
       E = 0;
@@ -59,51 +68,57 @@ virtual Expression::~Expression(){
 // Getters
 //
 
-std::string Expression::getTag(){
+std::string Expression::getTag() const{
   return tag;
 }
 
-bool Expression::isCommunative(){
+bool Expression::isCommunative() const{
   return communative;
 }
 
-bool Expression::isAssociative(){
+bool Expression::isAssociative() const{
   return associative;
 }
 
-bool Expression::isVariable(){
+bool Expression::isVariable() const{
   return getTag() == FunctionTags::VARIABLE;
 }
 
-bool Expression::isRational(){
+bool Expression::isRational() const{
   return getTag() == FunctionTags::RATIONAL;
 }
 
-bool Expression::isUndefined(){
+bool Expression::isUndefined() const{
   return undefined;
 }
 
-int Expression::size(){
+int Expression::size() const{
   return operands.size();
 }
 
-//virtual Rational getValue() = 0;
+boost::multiprecision::cpp_rational Expression::getValue() const{
+  throw "tried to get value from Expression class";
+  return boost::multiprecision::cpp_rational(0);
+}
 
-//virtual string get_name() = 0;
+std::string Expression::getName() const{
+  throw "tried to get name from Expression class";
+  return std::string();
+}
 
 //
 // Setters
 //
 
-virtual std::string Expression::to_string(){
+std::string Expression::toString() const{
   std:: string to_return = "";
-  for(Expression*& operand : operands){
-    to_return += " " + operand.to_string() + " ";
+  for(Expression* operand : operands){
+    to_return += " " + operand->toString() + " ";
   }
-  return "( " + FunctionTags[getTag()] + to_return + " )";
+  return "( " + FunctionTags::tag_to_print[getTag()] + to_return + " )";
 }
 
-void Expression::swap(Expression & other) throw(){
+void Expression::swap(Expression & other){
   using std::swap;
   swap(tag,other.tag);
   swap(max_operands,other.max_operands);
@@ -123,8 +138,9 @@ void Expression::swap(Expression & other) throw(){
 
 
 // implementation makes use of Copy-swap idiom for assignment
-virtual Expression::Expression& operator=(const Expression & other){
-  other.swap(*this);
+Expression& Expression::operator=(const Expression & other){
+  Expression to_swap = Expression(other);
+  to_swap.swap(*this);
   return *this;
 }
 
@@ -133,10 +149,10 @@ virtual Expression::Expression& operator=(const Expression & other){
 // this is not alwasy a valid assumption.
 
 // assumes both sides have been simplified to a cononical form
-virtual bool Expression::operator==(const Expression& lhs, const Expression& rhs){
-  if(lhs.getTag() == rhs.getTag() && lhs.size() == rhs.size()){
-    for(int i = 0; i < lhs.size(); ++i){
-      if(*lhs[i] != *rhs[i]){ //
+bool Expression::operator==(const Expression& rhs) const{
+  if(getTag() == rhs.getTag() && size() == rhs.size()){
+    for(int i = 0; i < size(); ++i){
+      if(this->operands[i] != rhs.operands[i]){ //
         return false;
       }
     }
@@ -144,31 +160,40 @@ virtual bool Expression::operator==(const Expression& lhs, const Expression& rhs
   }
   return false;
 }
-virtual bool Expression::operator!=(const Expression& lhs, const Expresion& rhs){
-  return !(lhs == rhs);
+
+bool Expression::operator!=(const Expression& rhs)  const{
+  return !(*this == rhs);
 }
-virtual bool Expression::operator< (const Expression& lhs, const Expression& rhs){
-  int lhs_prec = FunctionTags::precidence_map[lhs.getTag()];
+
+bool Expression::operator< (const Expression& rhs) const{
+  int lhs_prec = FunctionTags::precidence_map[getTag()];
   int rhs_prec = FunctionTags::precidence_map[rhs.getTag()];
-  if lhs_prec == rhs_prec{ //should work
-    return std::less(lhs.operator.begin(),lhs.operator.end(),
-                 rhs.operator.begin(),rhs.operator.end(),
-                 [](const Expression*new_lhs,const Expression*new_rhs){*new_lhs < *new_rhs;});
+  if(lhs_prec == rhs_prec){ //should work
+    for(int i = 0; i < std::min(size(),rhs.size()); ++i){
+      if(operands[i] == rhs.operands[i]){
+        continue;
+      }
+      else{
+        return operands[i] < rhs.operands[i];
+      }
+    }
+    return size() < rhs.size();
   }
   return lhs_prec < rhs_prec;
 }
 
-virtual bool Expression::operator> (const Expression& lhs, const Expression& rhs){
-  return !(lhs < rhs) && (lhs != rhs)
-}
-virtual bool Expression::operator<=(const Expression& lhs, const Expression& rhs){
-  return (lhs < rhs) || (lhs == rhs);
-}
-virtual bool Expression::operator>=(const Expression& lhs, const Expression& rhs){
-  return (lhs > rhs) || (lhs == rhs);
+bool Expression::operator>(const Expression& rhs) const{
+  return !(*this < rhs) && (*this != rhs);
 }
 
-virtual Expression* Expression::operator[](int pos){
+bool Expression::operator<=(const Expression& rhs) const{
+  return (*this < rhs) || (*this == rhs);
+}
+bool Expression::operator>=(const Expression& rhs) const{
+  return (*this > rhs) || (*this == rhs);
+}
+
+Expression* Expression::operator[](int pos){
   return operands[pos];
 }
 
@@ -177,13 +202,16 @@ virtual Expression* Expression::operator[](int pos){
 // CAS functions
 //
 
-Expression * simplify() = 0;
+Expression * Expression::simplify(){
+  throw "trying to simplify basic expression";
+  return this;
+}
 
 
 //
 // Helper Functions
 //
-void _delete_operands(){
+void Expression::_delete_operands(){
   for(Expression*& operand : operands){
     delete operand; // should recurively delete all operands in our Expression Tree
     operand = 0; // set pointer to null

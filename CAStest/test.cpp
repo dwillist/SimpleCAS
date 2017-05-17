@@ -2,6 +2,8 @@
 #include <cstdio>
 #include <vector>
 #include <string>
+#include <boost/multiprecision/cpp_int.hpp>
+#include <iostream>
 
 void printV(std::vector<bool> & B){
   for(int i = 0; i < B.size(); ++i){
@@ -16,16 +18,9 @@ void printV(std::vector<bool> & B){
 }
 
 int main(){
-  /*
-  std::vector<bool> B = {0,1,1,0};
-  printf("pre flip\n");
-  printV(B);
-  B.flip();
-  printf("post flip\n");
-  printV(B);
-  */
-  bool a = true;
-  bool b = true;
-  bool c = (a ^ b);
-  printf("%s", c ? "true" : "false");
+  // copy constructor test
+  int a = 5;
+  int * b = new int(a);
+  std::cout << *b << std::endl;
+
 }
