@@ -16,7 +16,6 @@ ProductExpression::ProductExpression(std::vector<Expression * > product_operands
     0,
     false,
     false,
-    false,
     boost::multiprecision::cpp_rational(),
     std::string(),
     product_operands)

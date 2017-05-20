@@ -12,14 +12,14 @@
 // CONSTRUCTORS
 //
 
-SumExpression::SumExpression(std::vector<Expression * > sum_operands) :
+SumExpression::SumExpression(std::vector<Expression * > sum_operands,
+  boost::multiprecision::cpp_rational value = boost::multiprecision::cpp_rational(0)) :
   Expression(FunctionTags::SUM,
     -1, // this is max value of size_t due to two's complement
     0,
     false,
     false,
-    false,
-    boost::multiprecision::cpp_rational(),
+    value,
     std::string(),
     sum_operands)
     {}

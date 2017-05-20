@@ -40,7 +40,7 @@ class RationalExpression : public Expression{
     virtual bool operator< (const Expression& rhs) const;
 
     // access operator, basically give us access to
-    virtual Expression* operator[](int pos);
+    virtual Expression* getOperand(int pos);
 
 
     //

@@ -10,7 +10,7 @@
 // CONSTRUCTORS
 //
 VariableExpression::VariableExpression(std::string name) :
-  Expression(FunctionTags::VARIABLE,0,0,false,false,false,boost::multiprecision::cpp_rational(),name)
+  Expression(FunctionTags::VARIABLE,0,0,false,false,boost::multiprecision::cpp_rational(),name)
   {}
 
 
@@ -59,7 +59,7 @@ bool VariableExpression::operator< (const Expression& rhs) const{
 }
 
 // access operator, basically give us access to
-Expression* VariableExpression::operator[](int pos){
+Expression* VariableExpression::getOperand(int pos){
   throw "Variable expression has no operands to access[]";
   return 0;
 }

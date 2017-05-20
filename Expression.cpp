@@ -17,7 +17,6 @@ Expression::Expression(
     std::size_t min_operands_size_t,
     bool communative_bool,
     bool associative_bool,
-    bool undefined_bool,
     boost::multiprecision::cpp_rational value_rational,
     std::string var_name_string,
     std::vector<Expression*> operands_vector
@@ -27,7 +26,6 @@ Expression::Expression(
       min_operands(min_operands_size_t),
       communative(communative_bool),
       associative(associative_bool),
-      undefined(undefined_bool),
       value(value_rational),
       var_name(var_name_string),
       operands(operands_vector)
@@ -43,10 +41,9 @@ Expression::Expression(const Expression & other){
     min_operands = other.min_operands;
     associative = other.associative;
     communative = other.communative;
-    undefined = other.undefined;
     value = other.value;
     var_name = other.var_name;
-    _delete_operands();
+    deletePtrVec(operands):
     for(Expression* operand : other.operands){
       Expression * to_add = new Expression(*operand); // will call copy constructor and recurse
       operands.push_back(to_add);
@@ -80,25 +77,12 @@ bool Expression::isAssociative() const{
   return associative;
 }
 
-bool Expression::isVariable() const{
-  return getTag() == FunctionTags::VARIABLE;
-}
-
-bool Expression::isRational() const{
-  return getTag() == FunctionTags::RATIONAL;
-}
-
-bool Expression::isUndefined() const{
-  return undefined;
-}
-
 int Expression::size() const{
   return operands.size();
 }
 
 boost::multiprecision::cpp_rational Expression::getValue() const{
-  throw "tried to get value from Expression class";
-  return boost::multiprecision::cpp_rational(0);
+  return value;
 }
 
 std::string Expression::getName() const{
@@ -156,7 +140,7 @@ bool Expression::operator==(const Expression& rhs) const{
         return false;
       }
     }
-    return true;
+    return rhs.getValue() == lhs.getValue();
   }
   return false;
 }
@@ -177,7 +161,7 @@ bool Expression::operator< (const Expression& rhs) const{
         return operands[i] < rhs.operands[i];
       }
     }
-    return size() < rhs.size();
+    return getValue() < rhs.getValue() || size() < rhs.size();
   }
   return lhs_prec < rhs_prec;
 }
@@ -193,9 +177,10 @@ bool Expression::operator>=(const Expression& rhs) const{
   return (*this > rhs) || (*this == rhs);
 }
 
-Expression* Expression::operator[](int pos){
+Expression* Expression::getOperand(int pos){
   return operands[pos];
 }
+
 
 
 //
@@ -211,8 +196,9 @@ Expression * Expression::simplify(){
 //
 // Helper Functions
 //
-void Expression::_delete_operands(){
-  for(Expression*& operand : operands){
+
+void deletePtrVec(vector<Expression * > to_delete){
+  for(Expression*& operand : to_delete ){
     delete operand; // should recurively delete all operands in our Expression Tree
     operand = 0; // set pointer to null
   }

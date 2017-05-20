@@ -11,7 +11,7 @@
 // CONSTRUCTORS
 //
 RationalExpression::RationalExpression(boost::multiprecision::cpp_rational R) :
-  Expression(FunctionTags::RATIONAL,0,0,false,false,false,R) // rest of args we let be default see Expression constructor
+  Expression(FunctionTags::RATIONAL,0,0,false,false,R) // rest of args we let be default see Expression constructor
   {}
 
 //overwritten functions
@@ -60,7 +60,7 @@ bool RationalExpression::operator==(const Expression& rhs) const{
 }
 
 // access operator, basically give us access to
-Expression* RationalExpression::operator[](int pos){
+Expression* RationalExpression::getOperand(int pos){
   throw "no operands to access[] for RationalExpression";
   return 0;
 }

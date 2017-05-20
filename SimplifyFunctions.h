@@ -1,108 +1,60 @@
 #ifndef _SIMPLIFY_FUNCTIONS_
 #define _SIMPLIFY_FUNCTIONS_
 
+#include <boost/multiprecision/cpp_int.hpp>
+
 #include "Expression.h"
 #include "Rational.h"
 #include "RationalExpression.h"
 #include "Factories.h"
+#include "RationalFunctions.h"
 
 
 #include <vector>
 
 namespace SimplifyFunctions{
-  /**
-    @params: expression
-    @return: returns true if Expression is a basic algebraic expression
-  */
-  bool isBAE(Expression* expr);
+  // Simplify verbosity
+  namespace BM = boost::multiprecision;
 
-  bool isASE(Expression * expr);
+  bool isInteger(RationalExpression * expr);
 
-  /**
-    @params: takes an expression E
-    @return: a pointer to a new expression created by applying associative transformation
-        ie: (x+y) + z = x+y+z basically reducing depth of our syntax Tree
-  */
-  Expression* AssociativeTransform(Expression * E);
+  bool isRational(Expression * expr);
 
-  /**
-    @params: takes an Expression E to transform, and a depth,
-    @returns: A new equivalent expression where we have distrubuted multiplication over addition
-              in the levels root to depth,
-              a depth of -1 indicates the entire expression
-  */
-  Expression* AlgebraicExpand(Expression * E,int depth = -1);
+  bool isVariable(Expression * expr);
 
-  /**
-    @params: an expression E to transform
-    @return: a new equivalent expression where we have sorted each subexpressions operands
-              if the operation is communative
-  */
-  Expression* CommunativeTransform(Expression * E);
+  bool isUndefined(Expnression * expr);
 
-  /**
-    @params: an Expression E to transform
-    @return: a new equivalent expression where we have preformed the following transformations
-              on exponents
-              i) u^n * u^m = u^(n+m)
-              ii) (u^n)^m = u^(n*m)
-              iii) (u*v)^n = (u^n) * (v^n)
-  */
-  Expression* ExponentTransform(Expression *E);
+  namespace ExponentSimplification{
 
-  /**
-    @params: an Expression E to transform
-    @return: An expression where all differences(subtractions) have been repaced with the following
-        u-v = u + (-1*v);
-  */
-  Expression* DifferenceTransform(Expression *E);
+    /**
+      params: two expressions representing base and exponent of a ExponentExpression
+      return: boolean value indicating if expression is UNDEFINED
+    */
+    bool SF::isUndefinedExponent(Expression * base, Expression * exponent);
 
-  /**
-    @params: an Expression E to transform
-    @return:
-  */
-  Expression* QuotentTransform(Expression *E);
+    /**
+      params: two expressions representing the base and exponenet of an ExponentExpression
+      return: Expression of
+    */
+    Expression * makeUndefinedExponenet(Expression * base, Expression * exponent);
 
-  /**
-    @params: an Expression E to transform,
-    @return: a Expression simplified by using identies found in the identity table
-    TODO: make sure that there are no identities in the table that create a cycle!
-  */
-  Expression* IdentityTransfrom(Expression *E);
+    bool SF::simplifiableToRational(RationalExpression * base,RationalExpression * exponent);
 
-  /**
-    @params: and Expression E to transform
-    @return: A expression where we have preformed unary simplifications
-  */
-  Expresion* UnaryTransforms(Expression *E);
+    Expression * simplifyBothRational(Expression * base,Expression * exponent);
 
-  /**
+    Expression * simplifyBaseRational(Expression * base,Expression * exponent);
 
-  */
-  Expression* NumericalTransforms(Expression *E);
+    Expression * simplifyExponentRational(Expression * base,Expression * exponent);
 
-
-  SimplifySum(Expression* sum_expression);
-  SimplifyProduct(Expression* prod_expression);
-  SimplifyPower(Expression* power_expreesion);
-
-}
-
-//
-// IMPLEMENTATION
-//
-
-
-bool SimplifyFunctions::isASE(Expression * expr){
-  if(expr -> isRational() || expr-> isVariable()){
-    return true;
+    /**
+      params: a rational base and a rational (with 1 as the denominator) integer_exponent
+      return: the rational value equivalent to base^integer_exponent
+        -watch out conversion could be very lossy due to forced conversion from
+        integer_exponent to type int (anything larger results in uncomputable exponenets)
+    */
+    RationalExpression* rational_pow(RationalExpression * base,RationalExpression * integer_exponent);
   }
-  return false;
-}
 
-bool SimplifyFunctions:isBAE(Expression * expr){
-  if(expr -> isVariable() || expr-> isRational()){ return true;}
-  else if()
 }
 
 #endif

@@ -14,7 +14,6 @@ protected:
     std::size_t min_operands;
     bool communative;
     bool associative;
-    bool undefined;
     boost::multiprecision::cpp_rational value;
     std::string var_name;
     std::vector<Expression*> operands;
@@ -29,7 +28,6 @@ protected:
       std::size_t min_operands_size_t,
       bool communative_bool,
       bool associative_bool,
-      bool undefined_bool,
       boost::multiprecision::cpp_rational value_rational = boost::multiprecision::cpp_rational(),
       std::string var_name_string = std::string(),
       std::vector<Expression*> operands_vector = std::vector<Expression*>()
@@ -65,18 +63,6 @@ protected:
       @return: boolean telling if expression uses an associative operation
     */
     bool isAssociative() const;
-
-    /**
-      @params: None;
-      @return: boolean value indicating if current expression is a VARIABLE
-    */
-    bool isVariable() const;
-
-    /**
-      @params: None;
-      @return: boolean value indicating if current expression is a RATIONAL
-    */
-    bool isRational() const;
 
     /**
       @params: None
@@ -135,8 +121,11 @@ protected:
   virtual bool operator<=(const Expression& rhs) const;
   virtual bool operator>=(const Expression& rhs) const;
 
-  // access operator, basically give us access to
-  virtual Expression* operator[](int pos);
+  /**
+    params: zero indexed position of operand to get
+    return: pointer to pos'th operand in Expression
+  */
+  virtual Expression* getOperand(int pos);
 
 
   //
@@ -149,6 +138,12 @@ protected:
   //
   // Helper Functions;
   //
+
+  /**
+    params: None
+    return: return an identical expression with value=0;
+  */
+  Expression * removeValue();
 
   // TODO: might want to make this a private member
   void _delete_operands();
