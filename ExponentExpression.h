@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "Expression.h"
+#include "SimplifyFunctions.h"
 
 class ExponentExpression : public Expression{
   public:
@@ -23,8 +24,12 @@ class ExponentExpression : public Expression{
       params: None
       return: rational number 0, exponents should not have constants
     */
-    virtual boost::multiprecision::cpp_rational getValue();
+    virtual boost::multiprecision::cpp_rational getValue() const;
 
+
+    virtual Expression * clone() const;
+
+    virtual Expression * clone(std::size_t begin, std::size_t end) const;
     //
     // CAS functions
     //
@@ -32,5 +37,6 @@ class ExponentExpression : public Expression{
     virtual Expression * simplify();
 
 };
+
 
 #endif

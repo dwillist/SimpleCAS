@@ -5,7 +5,11 @@
 #include <string>
 #include <vector>
 
+
 #include "Expression.h"
+
+// to reduce verbosity
+namespace BM = boost::multiprecision;
 
 class SumExpression : public Expression{
   public:
@@ -16,6 +20,9 @@ class SumExpression : public Expression{
 
     SumExpression(std::vector<Expression * > sum_operands);
     SumExpression(const Expression & E);
+    SumExpression(Expression * E1, Expression * E2); // binary sum constructor
+    SumExpression(const Expression & E,std::size_t begin,std::size_t end);
+
 
     // See Base class comments
     //virtual boost::multiprecision::cpp_rational getValue() const;
@@ -28,6 +35,14 @@ class SumExpression : public Expression{
     //
 
     virtual Expression * simplify();
+
+    //
+    // DeepCopy Functions
+    //
+
+    virtual Expression * clone() const;
+
+    virtual Expression * clone(std::size_t begin, std::size_t end) const;
 
 };
 

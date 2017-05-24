@@ -14,6 +14,14 @@ RationalExpression::RationalExpression(boost::multiprecision::cpp_rational R) :
   Expression(FunctionTags::RATIONAL,0,0,false,false,R) // rest of args we let be default see Expression constructor
   {}
 
+Expression * RationalExpression::clone() const{
+  return clone(0,size());
+}
+
+Expression * RationalExpression::clone(std::size_t begin, std::size_t end) const{
+  return new RationalExpression(this->getValue());
+}
+
 //overwritten functions
 
 // see base class comments
@@ -71,5 +79,5 @@ Expression* RationalExpression::getOperand(int pos){
 //
 
  Expression * RationalExpression::simplify(){
-  return this;
+  return new RationalExpression(*this);
 }

@@ -1,11 +1,13 @@
 #include <boost/multiprecision/cpp_int.hpp>
+#include <boost/assign/list_of.hpp>
 #include <string>
 #include <vector>
+#include <iostream>
 
 #include "ExponentExpression.h"
 #include "Expression.h"
 #include "FunctionTags.h"
-#include "SimplifyFunctions"
+#include "SimplifyFunctions.h"
 
 
 
@@ -15,7 +17,7 @@
 
 ExponentExpression::ExponentExpression(std::vector<Expression * > exponent_operands) :
   Expression(FunctionTags::EXPONENT,
-    2, // this is max value of size_t due to two's complement
+    2,
     2,
     false,
     false,
@@ -25,16 +27,24 @@ ExponentExpression::ExponentExpression(std::vector<Expression * > exponent_opera
     {}
 
 ExponentExpression::ExponentExpression(Expression * base,Expression * exponent) :
-Expression(boost::assign::list_of(base)(exponent)){}
+  ExponentExpression(SimplifyFunctions::buildBinaryVector(base,exponent)){}
 
 ExponentExpression::ExponentExpression(const Expression & E) : Expression(E){
     tag = FunctionTags::EXPONENT;
   }
 
 
+Expression * ExponentExpression::clone() const{
+  return clone(0,size());
+}
+
+Expression * ExponentExpression::clone(std::size_t begin, std::size_t end) const{
+  return new ExponentExpression(clone_operands(begin,end));
+}
+
 
 //Virtual Functions
-boost::multiprecision::cpp_rational getValue(){
+boost::multiprecision::cpp_rational ExponentExpression::getValue() const{
   return boost::multiprecision::cpp_rational(0);
 }
 
@@ -44,22 +54,25 @@ boost::multiprecision::cpp_rational getValue(){
 
 
 
-
 Expression * ExponentExpression::simplify(){
+  std::cout << "calling Exponent simplify" << std::endl;
   namespace SF = SimplifyFunctions;
   Expression * base =  getOperand(0)->simplify();
   Expression * exponent = getOperand(1)->simplify();
-  if(SF::isRational(base) && SF::isRational(exponent){
-    return simplify_both_rational(base,exponent);
+  if(SF::isRational(base) && SF::isRational(exponent)){
+    std::cout << "both ratonal" << std::endl;
+    return SF::simplifyBothRational(base,exponent);
   }
-  else if(SF::isRational(base){
-    return simplify_base_rational(base,exponent);
+  else if(SF::isRational(base)){
+    std::cout << "base ratonal" << std::endl;
+    return SF::simplifyBaseRational(base,exponent);
   }
-  else if(SF::isRational(exponent){
-    return simplify_exponent_rational(exponent);
+  else if(SF::isRational(exponent)){
+    std::cout << "exponent ratonal" << std::endl;
+    return SF::simplifyExponentRational(base,exponent);
   }
   // other simplifications
-  vector<Expression * > temp = {base,exponent};
-  Expression * to_return = new ExponentExpression(temp);
+  std::cout << "no simplification" << std::endl;
+  Expression * to_return = new ExponentExpression(base,exponent);
   return to_return;
 }

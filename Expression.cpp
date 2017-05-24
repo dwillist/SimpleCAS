@@ -3,6 +3,7 @@
 #include <map>
 #include <stdexcept>
 #include <boost/multiprecision/cpp_int.hpp>
+#include <iostream>
 
 #include "FunctionTags.h"
 #include "Expression.h"
@@ -37,17 +38,18 @@ Expression::Expression(
 
 Expression::Expression(const Expression & other){
   if(*this != other){
+    tag = other.getTag();
     max_operands = other.max_operands;
     min_operands = other.min_operands;
     associative = other.associative;
     communative = other.communative;
     value = other.value;
     var_name = other.var_name;
-    deletePtrVec(operands):
-    for(Expression* operand : other.operands){
-      Expression * to_add = new Expression(*operand); // will call copy constructor and recurse
-      operands.push_back(to_add);
-    }
+    deletePtrVec(operands);
+    operands = other.clone_operands(0,other.size());
+    //for(Expression* operand : other.operands){
+      //operands
+    //}
   }
 }
 
@@ -77,11 +79,12 @@ bool Expression::isAssociative() const{
   return associative;
 }
 
-int Expression::size() const{
+std::size_t Expression::size() const{
   return operands.size();
 }
 
 boost::multiprecision::cpp_rational Expression::getValue() const{
+  throw "Expression has no value";
   return value;
 }
 
@@ -110,7 +113,6 @@ void Expression::swap(Expression & other){
   swap(min_operands,other.min_operands);
   swap(communative,other.communative);
   swap(associative,other.associative);
-  swap(undefined,other.undefined);
   swap(value,other.value);
   swap(var_name,other.var_name);
   swap(operands,other.operands);
@@ -140,7 +142,7 @@ bool Expression::operator==(const Expression& rhs) const{
         return false;
       }
     }
-    return rhs.getValue() == lhs.getValue();
+    return true;
   }
   return false;
 }
@@ -161,7 +163,7 @@ bool Expression::operator< (const Expression& rhs) const{
         return operands[i] < rhs.operands[i];
       }
     }
-    return getValue() < rhs.getValue() || size() < rhs.size();
+    return size() < rhs.size();
   }
   return lhs_prec < rhs_prec;
 }
@@ -177,7 +179,7 @@ bool Expression::operator>=(const Expression& rhs) const{
   return (*this > rhs) || (*this == rhs);
 }
 
-Expression* Expression::getOperand(int pos){
+Expression* Expression::getOperand(std::size_t pos) const{
   return operands[pos];
 }
 
@@ -188,8 +190,7 @@ Expression* Expression::getOperand(int pos){
 //
 
 Expression * Expression::simplify(){
-  throw "trying to simplify basic expression";
-  return this;
+  return new Expression(*this);
 }
 
 
@@ -197,7 +198,22 @@ Expression * Expression::simplify(){
 // Helper Functions
 //
 
-void deletePtrVec(vector<Expression * > to_delete){
+std::vector<Expression *> Expression::clone_operands(std::size_t begin,std::size_t end) const{
+  std::vector<Expression *> to_return;
+  for(std::size_t i = begin; i < end; ++i){
+    to_return.push_back(getOperand(i)->clone());
+  }
+  return to_return;
+}
+
+Expression * Expression::clone(std::size_t begin,std::size_t end) const{
+  throw "base Expression should not be cloned";
+}
+Expression * Expression::clone() const{
+  throw "base Expression should not be cloned";
+}
+
+void Expression::deletePtrVec(std::vector<Expression * > to_delete){
   for(Expression*& operand : to_delete ){
     delete operand; // should recurively delete all operands in our Expression Tree
     operand = 0; // set pointer to null

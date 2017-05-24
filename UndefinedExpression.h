@@ -17,9 +17,12 @@ class UndefinedExpression : public Expression{
     // CONSTRUCTORS
     //
 
-    UndefinedExpression(std::vector<Expression * > sum_operands);
-    UndefinedExpression(const Expression * E); // wrapping constructor
+    UndefinedExpression(std::vector<Expression * > undefined_operands);
+    UndefinedExpression(Expression * E); // wrapping constructor
+    // have to watch out for this copy constructor it probably does not do what you want
+    // as it basically erases the operation and replaces it with undefined
     UndefinedExpression(const Expression & E);
+
 
 
     //
@@ -32,7 +35,22 @@ class UndefinedExpression : public Expression{
 
     virtual Expression * simplify();
 
+    //
+    // DeepCopy Functions
+    //
+
+    virtual Expression * clone() const;
+
+    virtual Expression * clone(std::size_t begin, std::size_t end) const;
+
+
 };
+
+//
+// helper functions
+//
+
+std::vector<Expression * > wrapWithVector(Expression * E);
 
 
 #endif

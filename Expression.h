@@ -33,6 +33,8 @@ protected:
       std::vector<Expression*> operands_vector = std::vector<Expression*>()
     );
 
+    // NOTE: this is a shallow copy and extreamly unsafe
+    // test if we can make this a deep copy
     Expression(const Expression & E); // copy constructor
 
     //
@@ -75,7 +77,7 @@ protected:
       @params: None
       @return: integer indicating size of operands vector
     */
-    int size() const;
+  std::size_t size() const;
 
     /**
       @params: None
@@ -125,7 +127,7 @@ protected:
     params: zero indexed position of operand to get
     return: pointer to pos'th operand in Expression
   */
-  virtual Expression* getOperand(int pos);
+  virtual Expression* getOperand(std::size_t pos) const;
 
 
   //
@@ -136,17 +138,22 @@ protected:
 
 
   //
+  // DeepCopy Functions
+  //
+
+  virtual Expression * clone() const;
+
+  virtual Expression * clone(std::size_t begin, std::size_t end) const;
+
+  //
   // Helper Functions;
   //
 
-  /**
-    params: None
-    return: return an identical expression with value=0;
-  */
-  Expression * removeValue();
+
+  std::vector<Expression *> clone_operands(std::size_t begin,std::size_t end) const;
 
   // TODO: might want to make this a private member
-  void _delete_operands();
+  void deletePtrVec(std::vector<Expression * > to_delete);
 
 };
 

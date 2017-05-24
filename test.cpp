@@ -8,19 +8,23 @@
 #include "SumExpression.h"
 #include "ProductExpression.h"
 #include "ExponentExpression.h"
+#include "UndefinedExpression.h"
+#include "SimplifyFunctions.h"
 
 int main(){
-  VariableExpression * X = new VariableExpression("x");
-  VariableExpression * Y = new VariableExpression("x");
-  RationalExpression * R = new RationalExpression(5);
-  std::cout << R->toString() << std::endl;
-  std::cout << X->toString() << std::endl;
+  RationalExpression * R1 = new RationalExpression(3);
+  VariableExpression * Y = new VariableExpression("y");
+  RationalExpression * R2 = new RationalExpression(5);
+  std::cout << "baseic operands " << std::endl;
+  std::cout << R1->toString() << std::endl;
+  std::cout << R2->toString() << std::endl;
   std::cout << Y->toString() << std::endl;
-  std::vector<Expression*> sum_operands {X,R};
-  std::cout << "attempting to build sum" << std::endl;
-  //SumExpression S = SumExpression(sum_operands);
-  //ProductExpression S = ProductExpression(sum_operands);
-  ExponentExpression S = ExponentExpression(sum_operands);
-  std::cout <<"attempting to print" << std::endl;
-  std::cout << S.toString() << std::endl;
+  //ProductExpression* S = new ProductExpression(R1,Y);
+  ExponentExpression * S = new ExponentExpression(R1,Y);
+  ExponentExpression* E = new ExponentExpression(S,R2);
+  Expression * simplifiedE = E->simplify();
+  std::cout <<"Exponent Expression E" << std::endl;
+  std::cout << E -> toString() << std::endl;
+  std::cout <<"simplified Exponent Expression E" << std::endl;
+  std::cout << simplifiedE->toString() << std::endl;
 }

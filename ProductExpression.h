@@ -16,12 +16,22 @@ class ProductExpression : public Expression{
 
     ProductExpression(std::vector<Expression * > product_operands);
     ProductExpression(const Expression & E);
+    ProductExpression(Expression * E1, Expression * E2); //binary constructor
+    ProductExpression(const Expression & E,std::size_t begin,std::size_t end);
 
     //
     // CAS functions
     //
 
     virtual Expression * simplify();
+
+    //
+    // DeepCopy Functions
+    //
+
+    virtual Expression * clone() const;
+
+    virtual Expression * clone(std::size_t begin, std::size_t end) const;
 
 };
 

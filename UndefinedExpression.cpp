@@ -2,6 +2,7 @@
 #include <boost/assign/list_of.hpp>
 #include <string>
 #include <vector>
+#include <stdexcept>
 
 #include "Expression.h"
 #include "UndefinedExpression.h"
@@ -12,33 +13,51 @@
   //
 
 
-UndefinedExpression(std::vector<Expression * > undefined_operand):
+UndefinedExpression::UndefinedExpression(std::vector<Expression * > undefined_operands):
   Expression(
     FunctionTags::UNDEFINED,
-    0,
+    1,
     0,
     false,
     false,
-    boost::multiprecision::cpp_rational value_rational = boost::multiprecision::cpp_rational(),
-    std::string var_name_string = std::string(),
-    std::vector<Expression*> operands_vector = std::vector<Expression*>())
+    boost::multiprecision::cpp_rational(),
+    std::string(),
+    undefined_operands)
     {}
 
-UndefinedExpression(const Expression * E) : UndefinedExpression(boost::assign::list_of(E)){}
+UndefinedExpression::UndefinedExpression(Expression * E) :
+  UndefinedExpression(wrapWithVector(E)){}
 
-UndefinedExpression(const Expression & E) : Expression(E){
+//
+UndefinedExpression::UndefinedExpression(const Expression & E) : Expression(E){
   tag = FunctionTags::UNDEFINED;
 }
 
+
+
+Expression * UndefinedExpression::clone() const{
+  return clone(0,size());
+}
+
+Expression * UndefinedExpression::clone(std::size_t begin, std::size_t end) const{
+  return new UndefinedExpression(clone_operands(begin,end));
+}
 //
 // CAS functions
 //
 
 
-boost::multiprecision::cpp_rational getValue() const{
-  return boost::multiprecision::cpp_rational(0);
+boost::multiprecision::cpp_rational UndefinedExpression::getValue() const{
+  throw "UndefinedExpression has no value";
 }
 
-Expression * UndefinedExpression::simplify(){
-  return UndefinedExpression(operands[0]->simplify());
+Expression * UndefinedExpression::UndefinedExpression::simplify(){
+  return new UndefinedExpression(operands[0]->simplify());
+}
+
+
+std::vector<Expression * > wrapWithVector(Expression * E){
+  std::vector<Expression *> to_return;
+  to_return.push_back(E);
+  return to_return;
 }

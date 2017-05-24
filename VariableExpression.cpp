@@ -1,6 +1,7 @@
 #include <string>
 #include <stdexcept>
 #include <boost/multiprecision/cpp_int.hpp>
+#include <iostream>
 
 #include "VariableExpression.h"
 #include "Expression.h"
@@ -70,5 +71,17 @@ Expression* VariableExpression::getOperand(int pos){
 //
 
 Expression * VariableExpression::simplify(){
-  return this;
+  return new VariableExpression(*this);
+}
+
+//
+// DeepCopy Functions
+//
+
+Expression * VariableExpression::clone() const{
+  return clone(0,size());
+}
+
+Expression * VariableExpression::clone(std::size_t begin, std::size_t end) const{
+  return new VariableExpression(this->getName());
 }

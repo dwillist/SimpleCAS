@@ -46,6 +46,14 @@ class VariableExpression : public Expression{
     //
 
     virtual Expression * simplify();
+
+    //
+    // DeepCopy Functions
+    //
+
+    virtual Expression * clone() const;
+
+    virtual Expression * clone(std::size_t begin, std::size_t end) const;
 };
 
 
