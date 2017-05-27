@@ -8,7 +8,7 @@
 #include "FunctionTags.h"
 #include "SimplifyFunctions.h"
 
-
+namespace SF = SimplifyFunctions;
 
 //
 // CONSTRUCTORS
@@ -18,8 +18,8 @@ SumExpression::SumExpression(std::vector<Expression * > sum_operands) :
   Expression(FunctionTags::SUM,
     -1, // this is max value of size_t due to two's complement
     0,
-    false,
-    false,
+    true,
+    true,
     boost::multiprecision::cpp_rational(0),
     std::string(),
     sum_operands)
@@ -57,5 +57,17 @@ std::string SumExpression::getName() const{
 //
 
 Expression * SumExpression::simplify(){
-    return this;
+  if(size() == 1){
+    return getOperand(0)->clone();
+  }
+  else{
+    std::vector<Expression *> simp_ops;
+    for(std::size_t i = 0; i < size(); ++i){
+      simp_ops.push_back(getOperand(i)->simplify());
+    }
+    Expression * new_sum = SimplifyFunctions::levelReduce(
+            new SumExpression(simp_ops),
+            SF::sum_create_function);
+    return SF::sumSimplfy(new_sum);
+  }
 }

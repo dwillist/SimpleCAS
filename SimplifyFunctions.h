@@ -29,6 +29,8 @@ namespace SimplifyFunctions{
 
   std::vector<Expression * > buildBinaryVector(Expression * E1, Expression * E2);
 
+  bool ptrLessThan(Expression * lhs, Expression * rhs);
+
 ///
 /// Exponent Simplification Functions
 ///
@@ -60,6 +62,50 @@ namespace SimplifyFunctions{
       integer_exponent to type int (anything larger results in uncomputable exponenets)
   */
   RationalExpression* rational_pow(Expression * base,Expression * integer_exponent);
+
+///
+/// General Addition and Multiplication transformations
+///
+
+/**
+  @params: an expression expr
+  @return: weather or not the expression is a negative (does not include rational)
+    - not that due to negative numbers begin stored as -1 * expr, this checks if the
+    - expression is of this form
+    - Note: will not work for rational numbers
+*/
+bool isNegativeExpr(Expression * expr);
+
+/**
+  @params: an expression to strip of constant
+  @return: an expression where we have taken away constant
+  - Note if passed a RationalExpression will return the RationalExpression(0);
+  - generally used to strip constants from product during factoring transformations
+*/
+Expression * stripConstant(Expression * expr);
+
+BM::cpp_rational getConstant(Expression * expr,BM::cpp_rational default_val = 0);
+
+///
+/// Level Reducer (for all associative operations)
+///
+
+Expression * levelReduce(
+          Expression * to_simplify,
+          Expression * expression_create_function(std::vector<Expression*>)
+        );
+
+Expression * sum_create_function(std::vector<Expression * > operand_vector);
+Expression * product_create_function(std::vector<Expression * > operand_vector);
+
+///
+/// Addition Reduction
+///
+
+Expression * sumSimplfy(Expression * E);
+
+
+
 
 }
 

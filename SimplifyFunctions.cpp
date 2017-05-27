@@ -1,5 +1,7 @@
 #include <boost/multiprecision/cpp_int.hpp>
+#include <map>
 #include <iostream>
+
 
 #include "SimplifyFunctions.h"
 #include "FunctionTags.h"
@@ -49,6 +51,10 @@ bool SF::isProduct(Expression * expr){
 std::vector<Expression * > SF::buildBinaryVector(Expression * E1, Expression * E2){
   std::vector<Expression *> to_return = {E1,E2};
   return to_return;
+}
+
+bool SF::ptrLessThan(Expression * lhs, Expression * rhs){
+  return (*lhs) < (*rhs);
 }
 
 bool SF::isUndefinedExponent(Expression * base, Expression * exponent){
@@ -167,4 +173,119 @@ RationalExpression * SF::rational_pow(Expression * base,Expression * integer_exp
   BM::cpp_int new_num = BM::pow(BM::numerator(base_value),int_exponent);
   BM::cpp_int new_denom = BM::pow(BM::denominator(base_value),int_exponent);
   return new RationalExpression(BM::cpp_rational(new_num,new_denom));
+}
+
+///
+/// General Addition and Multiplication transformations
+///
+
+bool SF::isNegativeExpr(Expression * expr){
+  return(expr->getTag() == FT::PRODUCT && *(expr->getOperand(0)) == RationalExpression(-1));
+}
+
+Expression * SF::stripConstant(Expression * expr){
+  return expr->clone(1,expr->size());
+}
+
+BM::cpp_rational SF::getConstant(Expression * expr,BM::cpp_rational default_val){
+  if(expr->getTag() == FT::RATIONAL){
+    return expr->getValue();
+  }
+  else if(expr->size() > 0 && expr->getOperand(0)->getTag() == FT::RATIONAL){
+    return expr->getOperand(0)->getValue();
+  }
+  return BM::cpp_rational(default_val);
+}
+
+
+///
+/// Level Reducer (for all associative operations)
+///
+
+Expression * SF::levelReduce(
+          Expression * to_simplify,
+          Expression * expression_create_function(std::vector<Expression*>)
+        ){
+  std::string current_tag = to_simplify->getTag();
+  if(!to_simplify->isAssociative()){
+    std::cout << "operation invalid on non-associative operators" << std::endl;
+    throw "operation invalid on non-associative operators";
+  }
+  // otherwise we may simplify
+  std::vector<Expression *> new_operands;
+  for(std::size_t i = 0; i < to_simplify->size(); ++i){
+    Expression * current_expression = to_simplify->getOperand(i);
+    if(current_expression -> getTag() == current_tag){
+      for(std::size_t j = 0; j < current_expression->size(); ++j){
+        new_operands.push_back(current_expression->getOperand(j)->clone());
+      }
+    }
+    else{
+      new_operands.push_back(current_expression->clone());
+    }
+  }
+    return expression_create_function(new_operands);
+}
+
+
+Expression * SF::sum_create_function(std::vector<Expression * > operand_vector){
+  return new SumExpression(operand_vector);
+}
+
+Expression * SF::product_create_function(std::vector<Expression * > operand_vector){
+  return new ProductExpression(operand_vector);
+}
+
+///
+/// Addition Reduction
+///
+
+
+
+Expression * SF::sumSimplfy(Expression * E){
+  // assumed we are passed an expression E that has been simplified then levelReduced
+
+  //create function pointer comp_ptr to use in map
+  BM::cpp_rational constant;
+  //
+  std::vector<Expression *> new_operands;
+  bool (*comp_ptr)(Expression*,Expression*) = SF::ptrLessThan;
+  std::map<Expression*,BM::cpp_rational,bool(*)(Expression*,Expression*)> op_map (comp_ptr);
+  for(std::size_t i = 0; i < E->size(); ++i){
+    Expression * current_operand = E->getOperand(i);
+    if(SF::isRational(current_operand)){
+      constant += SF::getConstant(current_operand);
+    }
+    else{
+      // we assume that if current_operand is a product it must have 2 or more operands
+      if(SF::isProduct(current_operand) && isRational(current_operand->getOperand(0))){
+        op_map[current_operand->clone(1,current_operand->size())] += SF::getConstant(current_operand,1);
+      }
+      else if(SF::isSum(current_operand)){
+        std::cout << "Sum detected in general Reduce, this should not be here" << std::endl;
+      }
+      else{
+        op_map[current_operand->clone()]++;
+      }
+    }
+  }
+  // now we need to turn our map into Expressions
+  //std::vector<Expression *> new_operands; declared above
+  if(constant != 0){
+    new_operands.push_back(new RationalExpression(constant));
+  }
+  for(auto map_element: op_map){
+    if(map_element.second != 1){
+      //NOTE: really should use unique pointers
+      RationalExpression * factor = new RationalExpression(map_element.second);
+      ProductExpression * prod = new ProductExpression(factor,map_element.first->clone());
+      new_operands.push_back(prod->simplify());
+      //delete factor; // should clean up memory leaks
+      //delete prod;
+    }
+    else{
+      new_operands.push_back(map_element.first);
+    }
+  }
+  return new SumExpression(new_operands);
 }
