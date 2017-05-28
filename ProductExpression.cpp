@@ -7,6 +7,10 @@
 #include "FunctionTags.h"
 #include "SimplifyFunctions.h"
 
+
+namespace SF = SimplifyFunctions;
+
+
 //
 // CONSTRUCTORS
 //
@@ -44,5 +48,17 @@ Expression * ProductExpression::clone(std::size_t begin, std::size_t end) const{
 //
 
 Expression * ProductExpression::simplify(){
-    return this;
+  if(size() == 1){
+    return getOperand(0)->clone();
+  }
+  else{
+    std::vector<Expression *> simp_ops;
+    for(std::size_t i = 0; i < size(); ++i){
+      simp_ops.push_back(getOperand(i)->simplify());
+    }
+    Expression * new_prod = SimplifyFunctions::levelReduce(
+            new ProductExpression(simp_ops),
+            SF::product_create_function);
+    return SF::productSimplify(new_prod);
+  }
 }

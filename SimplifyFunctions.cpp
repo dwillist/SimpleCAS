@@ -175,12 +175,21 @@ RationalExpression * SF::rational_pow(Expression * base,Expression * integer_exp
   return new RationalExpression(BM::cpp_rational(new_num,new_denom));
 }
 
+bool SF::hasRationalExponent(Expression * E){
+  return SF::isExponent(E) && SF::isRational(E->getOperand(1));
+}
+
 ///
 /// General Addition and Multiplication transformations
 ///
 
 bool SF::isNegativeExpr(Expression * expr){
   return(expr->getTag() == FT::PRODUCT && *(expr->getOperand(0)) == RationalExpression(-1));
+}
+
+// assumes simplification
+bool SF::hasConstant(Expression * expr){
+  return (expr->size() > 0) && SF::isRational(expr->getOperand(0));
 }
 
 Expression * SF::stripConstant(Expression * expr){
@@ -193,6 +202,14 @@ BM::cpp_rational SF::getConstant(Expression * expr,BM::cpp_rational default_val)
   }
   else if(expr->size() > 0 && expr->getOperand(0)->getTag() == FT::RATIONAL){
     return expr->getOperand(0)->getValue();
+  }
+  return BM::cpp_rational(default_val);
+}
+
+
+BM::cpp_rational SF::getExponentConstant(Expression * expr,BM::cpp_rational default_val){
+  if(SF::isExponent(expr) && SF::hasRationalExponent(expr)){
+    return expr->getOperand(1)->getValue();
   }
   return BM::cpp_rational(default_val);
 }
@@ -258,7 +275,7 @@ Expression * SF::sumSimplfy(Expression * E){
     }
     else{
       // we assume that if current_operand is a product it must have 2 or more operands
-      if(SF::isProduct(current_operand) && isRational(current_operand->getOperand(0))){
+      if(SF::isProduct(current_operand) && hasConstant(current_operand)){
         op_map[current_operand->clone(1,current_operand->size())] += SF::getConstant(current_operand,1);
       }
       else if(SF::isSum(current_operand)){
@@ -288,4 +305,57 @@ Expression * SF::sumSimplfy(Expression * E){
     }
   }
   return new SumExpression(new_operands);
+}
+
+///
+/// Product Simplification
+///
+
+
+Expression * SF::productSimplify(Expression * E){
+  // assumed we are passed an expression E that has been simplified then levelReduced
+
+  //create function pointer comp_ptr to use in map
+  BM::cpp_rational constant = BM::cpp_rational(1);
+  //
+  std::vector<Expression *> new_operands;
+  bool (*comp_ptr)(Expression*,Expression*) = SF::ptrLessThan;
+  std::map<Expression*,BM::cpp_rational,bool(*)(Expression*,Expression*)> op_map (comp_ptr);
+  for(std::size_t i = 0; i < E->size(); ++i){
+    Expression * current_operand = E->getOperand(i);
+    if(SF::isRational(current_operand)){
+      constant *= SF::getConstant(current_operand);
+    }
+    else{
+      // we assume that if current_operand is a sum it must have 2 or more operands
+      if(SF::isExponent(current_operand) && hasRationalExponent(current_operand)){
+        op_map[current_operand->clone(0,1)] += SF::getExponentConstant(current_operand);
+      }
+      else if(SF::isProduct(current_operand)){
+        std::cout << "Sum detected in general Reduce, this should not be here" << std::endl;
+      }
+      else{
+        op_map[current_operand->clone()]++;
+      }
+    }
+  }
+  // now we need to turn our map into Expressions
+  //std::vector<Expression *> new_operands; declared above
+  if(constant != 0){
+    new_operands.push_back(new RationalExpression(constant));
+  }
+  for(auto map_element: op_map){
+    if(map_element.second != 1){
+      //NOTE: really should use unique pointers
+      RationalExpression * exponent = new RationalExpression(map_element.second);
+      ExponentExpression * new_exp_expr = new ExponentExpression(map_element.first->clone(),exponent);
+      new_operands.push_back(new_exp_expr->simplify());
+      //delete factor; // should clean up memory leaks
+      //delete prod;
+    }
+    else{
+      new_operands.push_back(map_element.first);
+    }
+  }
+  return new ProductExpression(new_operands);
 }

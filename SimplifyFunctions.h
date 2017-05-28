@@ -63,6 +63,7 @@ namespace SimplifyFunctions{
   */
   RationalExpression* rational_pow(Expression * base,Expression * integer_exponent);
 
+  bool hasRationalExponent(Expression * E);
 ///
 /// General Addition and Multiplication transformations
 ///
@@ -76,6 +77,8 @@ namespace SimplifyFunctions{
 */
 bool isNegativeExpr(Expression * expr);
 
+bool hasConstant(Expression * expr);
+
 /**
   @params: an expression to strip of constant
   @return: an expression where we have taken away constant
@@ -85,6 +88,8 @@ bool isNegativeExpr(Expression * expr);
 Expression * stripConstant(Expression * expr);
 
 BM::cpp_rational getConstant(Expression * expr,BM::cpp_rational default_val = 0);
+
+BM::cpp_rational getExponentConstant(Expression * expr,BM::cpp_rational default_val = 1);
 
 ///
 /// Level Reducer (for all associative operations)
@@ -104,6 +109,11 @@ Expression * product_create_function(std::vector<Expression * > operand_vector);
 
 Expression * sumSimplfy(Expression * E);
 
+///
+/// Product Reduction
+///
+
+Expression * productSimplify(Expression * E);
 
 
 

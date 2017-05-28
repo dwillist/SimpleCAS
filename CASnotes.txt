@@ -1,10 +1,13 @@
 
 TODO:
 1- Re-consider SimplifyFunctions Base Rational function. Need to come up with a better
-  deffinition of simplification before writing this. Really would be nice to avoid loops as well
+  definition of simplification before writing this. Really would be nice to avoid loops as well
 2- *Test functions of BigInt class (might never use due to boost)
 3- need to have some sort of class for collecting constants that we cannot simplify to rationals
+4- productSimplify and sumSimplfy are quite similar some refactoring may be in order.
 
+5- might need to implement some custom numerical type to allow for prime factorization of large
+   integers so that comparisons are more efficient.
 
 NOTE:
-  compilation may require c++11 due to initilaizing vectors and default < operator used in vectors
+  compilation may require c++11 due to initializing vectors and default < operator used in vectors
