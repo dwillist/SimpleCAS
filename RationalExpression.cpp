@@ -79,5 +79,9 @@ Expression* RationalExpression::getOperand(int pos){
 //
 
  Expression * RationalExpression::simplify(){
-  return new RationalExpression(*this);
+  return clone();
+}
+
+Expression * RationalExpression::derivative(std::string with_respect_to){
+  return new RationalExpression(0);
 }

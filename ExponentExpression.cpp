@@ -4,6 +4,7 @@
 #include <vector>
 #include <iostream>
 
+#include "ProductExpression.h"
 #include "ExponentExpression.h"
 #include "Expression.h"
 #include "FunctionTags.h"
@@ -39,7 +40,8 @@ Expression * ExponentExpression::clone() const{
 }
 
 Expression * ExponentExpression::clone(std::size_t begin, std::size_t end) const{
-  return new ExponentExpression(clone_operands(begin,end));
+  Expression * to_return = new ExponentExpression(clone_operands(begin,end));
+  return to_return->simplify();
 }
 
 
@@ -75,4 +77,8 @@ Expression * ExponentExpression::simplify(){
   std::cout << "no simplification" << std::endl;
   Expression * to_return = new ExponentExpression(base,exponent);
   return to_return;
+}
+
+Expression * ExponentExpression::derivative(std::string with_respect_to){
+  return new ProductExpression(operands[1]->derivative(with_respect_to),clone());
 }

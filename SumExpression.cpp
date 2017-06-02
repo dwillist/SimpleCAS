@@ -38,7 +38,8 @@ Expression * SumExpression::clone() const{
 }
 
 Expression * SumExpression::clone(std::size_t begin, std::size_t end) const{
-  return new SumExpression(clone_operands(begin,end));
+  Expression * to_return = new SumExpression(clone_operands(begin,end));
+  return to_return->simplify();
 }
 
 /*
@@ -70,4 +71,12 @@ Expression * SumExpression::simplify(){
             SF::sum_create_function);
     return SF::sumSimplfy(new_sum);
   }
+}
+
+Expression * SumExpression::derivative(std::string with_respect_to){
+  std::vector<Expression * > derivative_operands;
+  for(auto && operand : operands){
+    derivative_operands.push_back(operand->derivative((with_respect_to)));
+  }
+  return new SumExpression(derivative_operands);
 }

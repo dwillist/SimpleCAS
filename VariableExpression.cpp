@@ -3,6 +3,7 @@
 #include <boost/multiprecision/cpp_int.hpp>
 #include <iostream>
 
+#include "RationalExpression.h"
 #include "VariableExpression.h"
 #include "Expression.h"
 #include "FunctionTags.h"
@@ -71,7 +72,14 @@ Expression* VariableExpression::getOperand(int pos){
 //
 
 Expression * VariableExpression::simplify(){
-  return new VariableExpression(*this);
+  return clone();
+}
+
+Expression * VariableExpression::derivative(std::string with_respect_to){
+  if(getName() == with_respect_to){
+    return new RationalExpression(1);
+  }
+  return new RationalExpression(0);
 }
 
 //

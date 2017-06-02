@@ -34,6 +34,9 @@ class UndefinedExpression : public Expression{
     virtual boost::multiprecision::cpp_rational getValue() const;
 
     virtual Expression * simplify();
+  
+    virtual Expression * derivative(std::string with_respect_to);
+
 
     //
     // DeepCopy Functions

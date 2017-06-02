@@ -46,6 +46,9 @@ class VariableExpression : public Expression{
     //
 
     virtual Expression * simplify();
+  
+    virtual Expression * derivative(std::string with_respect_to);
+
 
     //
     // DeepCopy Functions

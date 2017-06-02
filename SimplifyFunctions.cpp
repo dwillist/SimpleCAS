@@ -1,4 +1,5 @@
 #include <boost/multiprecision/cpp_int.hpp>
+#include <boost/multiprecision/cpp_dec_float.hpp>
 #include <map>
 #include <iostream>
 
@@ -304,6 +305,9 @@ Expression * SF::sumSimplfy(Expression * E){
       new_operands.push_back(map_element.first);
     }
   }
+  if(new_operands.size() == 1){
+    return new_operands[0];
+  }
   return new SumExpression(new_operands);
 }
 
@@ -341,7 +345,12 @@ Expression * SF::productSimplify(Expression * E){
   }
   // now we need to turn our map into Expressions
   //std::vector<Expression *> new_operands; declared above
-  if(constant != 0){
+  if( constant == 0){
+    deletePtrVec(new_operands);
+    return new RationalExpression(0);
+  }
+
+  else if(constant != 1){
     new_operands.push_back(new RationalExpression(constant));
   }
   for(auto map_element: op_map){
@@ -357,5 +366,36 @@ Expression * SF::productSimplify(Expression * E){
       new_operands.push_back(map_element.first);
     }
   }
+  if(new_operands.size() == 1){
+    return new_operands[0];
+  }
   return new ProductExpression(new_operands);
 }
+
+
+
+///
+/// Logorithm Reduction
+///
+
+Expression * logorithmBothRational(Expression * base, Expression * argument){
+  BM::cpp_dec_float_100 base_num = BM::numerator(base->getValue());
+  BM::cpp_dec_float_100 base_denom = BM::numerator(base->getValue());
+  BM::cpp_dec_float_100 argument_num = BM::numerator(argument->getValue());
+  BM::cpp_dec_float_100 argument_denom = BM::numerator(argument->getValue());
+  return BM::log2(argument_num/argument_denom)/BM::log2(base_num/base_denom);
+  
+  
+  
+}
+
+Expression * logorithmNonRationalBase(Expression * base, Expression * argument);
+
+Expression * logorithmSum(Expression * base, Expression * argument);
+
+Expression * logorithmProduct(Expression * base, Expression * argument);
+
+Expression * logorithmExponent(Expression * base, Expression * argument);
+
+Expression * logorithmRational(Expression * base, Expression * argument);
+

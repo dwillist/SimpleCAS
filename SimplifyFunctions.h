@@ -116,7 +116,23 @@ Expression * sumSimplfy(Expression * E);
 Expression * productSimplify(Expression * E);
 
 
+///
+/// Logorithm Reduction
+///
+Expression * logorithmBothRational(Expression * base, Expression * argument);
+  
+Expression * logorithmNonRationalBase(Expression * base, Expression * argument);
 
+Expression * logorithmSum(Expression * base, Expression * argument);
+
+Expression * logorithmProduct(Expression * base, Expression * argument);
+  
+Expression * logorithmExponent(Expression * base, Expression * argument);
+  
+Expression * logorithmRational(Expression * base, Expression * argument);
+
+
+  
 }
 
 #endif

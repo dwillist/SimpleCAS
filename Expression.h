@@ -135,6 +135,8 @@ protected:
   //
 
   virtual Expression * simplify();
+  
+  virtual Expression * derivative(std::string with_respect_to);
 
 
   //
@@ -153,8 +155,8 @@ protected:
   std::vector<Expression *> clone_operands(std::size_t begin,std::size_t end) const;
 
   // TODO: might want to make this a private member
-  void deletePtrVec(std::vector<Expression * > to_delete);
-
 };
+
+void deletePtrVec(std::vector<Expression * > to_delete);
 
 #endif

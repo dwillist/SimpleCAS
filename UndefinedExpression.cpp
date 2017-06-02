@@ -55,6 +55,12 @@ Expression * UndefinedExpression::UndefinedExpression::simplify(){
   return new UndefinedExpression(operands[0]->simplify());
 }
 
+Expression * UndefinedExpression::derivative(std::string with_respect_to){
+  return new UndefinedExpression(operands[0]->derivative(with_respect_to));
+}
+
+
+
 
 std::vector<Expression * > wrapWithVector(Expression * E){
   std::vector<Expression *> to_return;

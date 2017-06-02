@@ -190,7 +190,11 @@ Expression* Expression::getOperand(std::size_t pos) const{
 //
 
 Expression * Expression::simplify(){
-  return new Expression(*this);
+  return this -> clone();
+}
+
+ Expression * Expression::derivative(std::string with_respect_to){
+  return this->clone();
 }
 
 
@@ -213,10 +217,10 @@ Expression * Expression::clone() const{
   throw "base Expression should not be cloned";
 }
 
-void Expression::deletePtrVec(std::vector<Expression * > to_delete){
+void deletePtrVec(std::vector<Expression * > to_delete){
   for(Expression*& operand : to_delete ){
     delete operand; // should recurively delete all operands in our Expression Tree
     operand = 0; // set pointer to null
   }
-  operands.clear();
+  to_delete.clear();
 }

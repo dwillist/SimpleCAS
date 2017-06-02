@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 
+#include "SumExpression.h"
 #include "ProductExpression.h"
 #include "Expression.h"
 #include "FunctionTags.h"
@@ -19,8 +20,8 @@ ProductExpression::ProductExpression(std::vector<Expression * > product_operands
   Expression(FunctionTags::PRODUCT,
     -1, // this is max value of size_t due to two's complement
     0,
-    false,
-    false,
+    true,
+    true,
     boost::multiprecision::cpp_rational(),
     std::string(),
     product_operands)
@@ -40,7 +41,8 @@ Expression * ProductExpression::clone() const{
 }
 
 Expression * ProductExpression::clone(std::size_t begin, std::size_t end) const{
-  return new ProductExpression(clone_operands(begin,end));
+  Expression * to_return = new ProductExpression(clone_operands(begin,end));
+  return to_return->simplify();
 }
 
 //
@@ -61,4 +63,10 @@ Expression * ProductExpression::simplify(){
             SF::product_create_function);
     return SF::productSimplify(new_prod);
   }
+}
+
+Expression * ProductExpression::derivative(std::string with_respect_to){
+  ProductExpression * lhs = new ProductExpression(operands[0]->derivative(with_respect_to),clone(1,size()));
+  ProductExpression * rhs = new ProductExpression(operands[0],clone(1,size())->derivative(with_respect_to));
+  return new SumExpression(lhs,rhs);
 }
