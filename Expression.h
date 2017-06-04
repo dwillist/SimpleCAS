@@ -128,6 +128,8 @@ protected:
     return: pointer to pos'th operand in Expression
   */
   virtual Expression* getOperand(std::size_t pos) const;
+  
+  Expression * Expression::getClone(std::size_t pos) const;
 
 
   //

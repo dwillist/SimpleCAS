@@ -7,7 +7,7 @@
 #include "LogExpression.h"
 #include "Expression.h"
 #include "SimplifyFunctions.h"
-#include "FunctionTag.h"
+#include "FunctionTags.h"
 
 namespace SF = SimplifyFunctions;
 namespace BM = boost::multiprecision;
@@ -26,7 +26,9 @@ Expression(FunctionTags::LOGORITHM,
            BM::cpp_rational(),
            std::string(),
            log_operands)
-  {}
+  {
+    
+  }
 
 
 LogExpression::LogExpression(Expression * base,Expression * argument) :
@@ -53,8 +55,37 @@ BM::cpp_rational LogExpression::getValue() const{
 }
 
 Expression * LogExpression::simplify(){
-  
+  Expression * base = getOperand(0)->simplify();
+  Expression * argument = getOperand(1)->simplify();
+  if(SF::isRational(base) && SF::isRational(argument)){
+    return SF::logorithmBothRational(base,argument);
+  }
+  else if(!SF::isRational(base)){
+    return SF::logorithmNonRationalBase(base, argument);
+  }
+  else if(SF::isSum(argument)){
+    return SF::logorithmSum(base, argument);
+  }
+  else if(SF::isProduct(argument)){
+    return SF::logorithmProduct(base, argument);
+  }
+  else if(SF::isExponent(argument)){
+    return SF::logorithmExponent(base, argument);
+  }
+  else if(SF::isRational(base)){
+    return SF::logorithmRational(base, argument);
+  }
+  else{
+    std::cout<< "Error log simplification not found" << std::endl;
+  }
 }
 
-Expression * LogExpression::derivative(std::string with_respect_to);
+Expression * LogExpression::derivative(std::string with_respect_to){
+  // need lots of parts to do this
+  Expression * base_derivative = getOperand(0)->derivative(with_respect_to);
+  Expression * argument_derivative = getOperand(1)->derivative(with_respect_to);
+  Expression * base_clone = getOperand(0)->clone();
+  Expression * argument_clone = getOperand(1)->clone();
+  
+}
 

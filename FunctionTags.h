@@ -13,8 +13,9 @@ namespace FunctionTags{
   extern std::string QUOTENT;
   extern std::string VARIABLE;
   extern std::string RATIONAL;
+  extern std::string LOGORITHM;
   extern std::map<std::string,std::string> tag_to_print;
-  enum PRECIDENCE {UNDEFINED_PREC,RATIONAL_PREC,VARIABLE_PREC,SUM_PREC,PRODUCT_PREC,EXPONENT_PREC};
+  enum PRECIDENCE {UNDEFINED_PREC,RATIONAL_PREC,VARIABLE_PREC,SUM_PREC,PRODUCT_PREC,EXPONENT_PREC,LOGORITHM_PREC};
   extern std::map<std::string,int> precidence_map;
 };
 

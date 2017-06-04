@@ -1,5 +1,6 @@
 #include <boost/multiprecision/cpp_int.hpp>
 #include <boost/multiprecision/cpp_dec_float.hpp>
+#include <boost/math/constants/constants.hpp>
 #include <map>
 #include <iostream>
 
@@ -12,6 +13,7 @@
 #include "ExponentExpression.h"
 #include "SumExpression.h"
 #include "ProductExpression.h"
+#include "LogExpression.h"
 
 namespace SF = SimplifyFunctions;
 namespace BM = boost::multiprecision;
@@ -379,23 +381,48 @@ Expression * SF::productSimplify(Expression * E){
 ///
 
 Expression * logorithmBothRational(Expression * base, Expression * argument){
-  BM::cpp_dec_float_100 base_num = BM::numerator(base->getValue());
-  BM::cpp_dec_float_100 base_denom = BM::numerator(base->getValue());
-  BM::cpp_dec_float_100 argument_num = BM::numerator(argument->getValue());
-  BM::cpp_dec_float_100 argument_denom = BM::numerator(argument->getValue());
-  return BM::log2(argument_num/argument_denom)/BM::log2(base_num/base_denom);
-  
-  
+  BM::cpp_rational base_rational = base->getValue();
+  BM::cpp_rational argument_rational = argument->getValue();
+  BM::cpp_dec_float_100 base_dec = static_cast<BM::cpp_dec_float_100>(base_rational);
+  BM::cpp_dec_float_100 argument_dec = static_cast<BM::cpp_dec_float_100>(argument_rational);
+  BM::cpp_dec_float_100 log_result = BM::log(argument_dec) / BM::log(base_dec);
+  return new RationalExpression(log_result.convert_to<BM::cpp_rational>());
+}
+
+Expression * logorithmNonRationalBase(Expression * base, Expression * argument){
+  Expression * denom = new ExponentExpression(new LogExpression(new RationalExpression(2),base->clone()), new RationalExpression(-1));
+  Expression * num = new LogExpression(new RationalExpression(2),argument->clone());
+  return new ProductExpression(num,denom);
+}
+
+Expression * logorithmSum(Expression * base, Expression * argument){
   
 }
 
-Expression * logorithmNonRationalBase(Expression * base, Expression * argument);
+Expression * logorithmProduct(Expression * base, Expression * argument){
+  std::vector<Expression * > sum_vector;
+  for(std::size_t i = 0; i < argument->size(); ++i){
+    sum_vector.push_back(new LogExpression(base->clone(),argument->getClone(i)));
+  }
+  return new SumExpression(sum_vector);
+}
 
-Expression * logorithmSum(Expression * base, Expression * argument);
+Expression * logorithmExponent(Expression * base, Expression * argument){
+  Expression * exp_base = argument ->getClone(0);
+  Expression * exp_exponent = argument -> getClone(1);
+  Expression * new_log = new LogExpression(base, exp_base);
+  return new ProductExpression(exp_exponent,new_log);
+}
 
-Expression * logorithmProduct(Expression * base, Expression * argument);
+Expression * logorithmRational(Expression * base, Expression * argument){
+  return new LogExpression(base,argument);
+}
 
-Expression * logorithmExponent(Expression * base, Expression * argument);
+///
+/// Logorithm Creation
+///
 
-Expression * logorithmRational(Expression * base, Expression * argument);
+Expression * makeNaturalLog(Expression * argument){
+  return new LogExpression(new RationalExpression(static_cast<BM::cpp_rational>(boost::math::float_constants::e)),argument->clone());
+}
 

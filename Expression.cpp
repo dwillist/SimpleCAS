@@ -183,6 +183,9 @@ Expression* Expression::getOperand(std::size_t pos) const{
   return operands[pos];
 }
 
+Expression * Expression::getClone(std::size_t pos) const{
+  return getOperand(pos)->clone();
+}
 
 
 //
