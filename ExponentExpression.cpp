@@ -4,6 +4,7 @@
 #include <vector>
 #include <iostream>
 
+#include "SumExpression.h"
 #include "ProductExpression.h"
 #include "ExponentExpression.h"
 #include "Expression.h"
@@ -62,7 +63,7 @@ Expression * ExponentExpression::simplify(){
   Expression * base =  getOperand(0)->simplify();
   Expression * exponent = getOperand(1)->simplify();
   if(SF::isRational(base) && SF::isRational(exponent)){
-    std::cout << "both ratonal" << std::endl;
+    std::cout << "both ratonal: " << toString() << std::endl;
     return SF::simplifyBothRational(base,exponent);
   }
   else if(SF::isRational(base)){
@@ -80,5 +81,13 @@ Expression * ExponentExpression::simplify(){
 }
 
 Expression * ExponentExpression::derivative(std::string with_respect_to){
-  return new ProductExpression(operands[1]->derivative(with_respect_to),clone());
+  Expression * base_derivative = getOperand(0)->derivative(with_respect_to);
+  Expression * exponent_derivative = getOperand(1)->derivative(with_respect_to);
+  Expression * base_clone = getOperand(0)->clone();
+  Expression * exponent_clone = getOperand(1)->clone();
+  
+  Expression * first_prod = new ProductExpression(base_derivative->clone(),SimplifyFunctions::makeQuotent(exponent_clone->clone(), base_clone->clone()));
+  Expression * second_prod = new ProductExpression(exponent_derivative->clone(),SimplifyFunctions::makeNaturalLog(base_clone->clone()));
+  Expression * sum_expr = new SumExpression(first_prod,second_prod);
+  return new ProductExpression(new ExponentExpression(base_clone,exponent_clone),sum_expr);
 }

@@ -1,8 +1,9 @@
 #ifndef _DIFFERENCE_EXPRESSION_H_
 #define _DIFFERENCE_EXPRESSION_H_
 
+#include <boost/multiprecision/cpp_int.hpp>
+
 #include "Expression.h"
-#include "Rational.h"
 
 class DifferenceExpression : public Expression{
   public:
@@ -25,10 +26,10 @@ class DifferenceExpression : public Expression{
     //
 
     // See Base class comments
-    virtual Rational getValue();
+  virtual boost::multiprecision::cpp_rational getValue();
 
     // See Base class comments
-    virtual string get_name();
+  virtual std::string get_name();
 
     //
     // CAS functions

@@ -30,12 +30,16 @@ namespace ParseLib{
   bool isProductSymbol(std::string & s);
 
   bool isExponentSymbol(std::string & s);
+  
+  bool isLogorithmSymbol(std::string & x);
 
   Expression * makeSum(std::vector<Expression *> expression_vec);
 
   Expression * makeProduct(std::vector<Expression *> expression_vec);
 
   Expression * makeExponent(std::vector<Expression *> expression_vec);
+  
+  Expression * makeLogorithm(std::vector<Expression *> expression_vec);
 
   Expression * makeRational(std::string & rational_string);
 

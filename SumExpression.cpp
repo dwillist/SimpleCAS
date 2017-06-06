@@ -58,6 +58,9 @@ std::string SumExpression::getName() const{
 //
 
 Expression * SumExpression::simplify(){
+  if(size() == 0){
+    return new RationalExpression(0);
+  }
   if(size() == 1){
     return getOperand(0)->clone();
   }

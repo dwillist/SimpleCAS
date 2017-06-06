@@ -6,6 +6,7 @@
 
 
 #include "SimplifyFunctions.h"
+#include "ProductExpression.h"
 #include "FunctionTags.h"
 #include "Expression.h"
 #include "RationalExpression.h"
@@ -49,6 +50,10 @@ bool SF::isSum(Expression * expr){
 
 bool SF::isProduct(Expression * expr){
   return expr->getTag() == FT::PRODUCT;
+}
+
+bool SF::isLogorithm(Expression * expr){
+  return expr->getTag() == FT::LOGORITHM;
 }
 
 std::vector<Expression * > SF::buildBinaryVector(Expression * E1, Expression * E2){
@@ -165,7 +170,9 @@ Expression * SF::simplifyExponentRational(Expression * base,Expression * exponen
   return new ExponentExpression(base,exponent);
 }
 
+// need this to be able to deal with negative exponents,
 RationalExpression * SF::rational_pow(Expression * base,Expression * integer_exponent){
+  std::cout << "rational pow called " << std::endl;
   BM::cpp_rational base_value = base->getValue();
   BM::cpp_rational integer_exponent_value = integer_exponent->getValue();
   if(BM::denominator(integer_exponent_value) != 1){
@@ -173,8 +180,16 @@ RationalExpression * SF::rational_pow(Expression * base,Expression * integer_exp
   }
   // otherwise we have an integer exponenet
   int int_exponent = integer_exponent_value.convert_to<int>();
-  BM::cpp_int new_num = BM::pow(BM::numerator(base_value),int_exponent);
-  BM::cpp_int new_denom = BM::pow(BM::denominator(base_value),int_exponent);
+  BM::cpp_int new_num;
+  BM::cpp_int new_denom;
+  if(integer_exponent_value < 0){
+    new_num = BM::pow(BM::denominator(base_value),abs(int_exponent));
+    new_denom = BM::pow(BM::numerator(base_value),abs(int_exponent));
+  }
+  else{
+    new_num = BM::pow(BM::numerator(base_value),int_exponent);
+    new_denom = BM::pow(BM::denominator(base_value),int_exponent);
+  }
   return new RationalExpression(BM::cpp_rational(new_num,new_denom));
 }
 
@@ -335,7 +350,8 @@ Expression * SF::productSimplify(Expression * E){
     else{
       // we assume that if current_operand is a sum it must have 2 or more operands
       if(SF::isExponent(current_operand) && hasRationalExponent(current_operand)){
-        op_map[current_operand->clone(0,1)] += SF::getExponentConstant(current_operand);
+        //TODO: check if this is vaid
+        op_map[current_operand->getClone(0)] += SF::getExponentConstant(current_operand);
       }
       else if(SF::isProduct(current_operand)){
         std::cout << "Sum detected in general Reduce, this should not be here" << std::endl;
@@ -380,7 +396,7 @@ Expression * SF::productSimplify(Expression * E){
 /// Logorithm Reduction
 ///
 
-Expression * logorithmBothRational(Expression * base, Expression * argument){
+Expression * SF::logorithmBothRational(Expression * base, Expression * argument){
   BM::cpp_rational base_rational = base->getValue();
   BM::cpp_rational argument_rational = argument->getValue();
   BM::cpp_dec_float_100 base_dec = static_cast<BM::cpp_dec_float_100>(base_rational);
@@ -389,17 +405,17 @@ Expression * logorithmBothRational(Expression * base, Expression * argument){
   return new RationalExpression(log_result.convert_to<BM::cpp_rational>());
 }
 
-Expression * logorithmNonRationalBase(Expression * base, Expression * argument){
+Expression * SF::logorithmNonRationalBase(Expression * base, Expression * argument){
   Expression * denom = new ExponentExpression(new LogExpression(new RationalExpression(2),base->clone()), new RationalExpression(-1));
   Expression * num = new LogExpression(new RationalExpression(2),argument->clone());
   return new ProductExpression(num,denom);
 }
 
-Expression * logorithmSum(Expression * base, Expression * argument){
-  
+Expression * SF::logorithmSum(Expression * base, Expression * argument){
+  return new LogExpression(base->clone(),argument->clone());
 }
 
-Expression * logorithmProduct(Expression * base, Expression * argument){
+Expression * SF::logorithmProduct(Expression * base, Expression * argument){
   std::vector<Expression * > sum_vector;
   for(std::size_t i = 0; i < argument->size(); ++i){
     sum_vector.push_back(new LogExpression(base->clone(),argument->getClone(i)));
@@ -407,14 +423,14 @@ Expression * logorithmProduct(Expression * base, Expression * argument){
   return new SumExpression(sum_vector);
 }
 
-Expression * logorithmExponent(Expression * base, Expression * argument){
+Expression * SF::logorithmExponent(Expression * base, Expression * argument){
   Expression * exp_base = argument ->getClone(0);
   Expression * exp_exponent = argument -> getClone(1);
   Expression * new_log = new LogExpression(base, exp_base);
   return new ProductExpression(exp_exponent,new_log);
 }
 
-Expression * logorithmRational(Expression * base, Expression * argument){
+Expression * SF::logorithmRational(Expression * base, Expression * argument){
   return new LogExpression(base,argument);
 }
 
@@ -422,7 +438,27 @@ Expression * logorithmRational(Expression * base, Expression * argument){
 /// Logorithm Creation
 ///
 
-Expression * makeNaturalLog(Expression * argument){
+Expression * SF::makeNaturalLog(Expression * argument){
   return new LogExpression(new RationalExpression(static_cast<BM::cpp_rational>(boost::math::float_constants::e)),argument->clone());
 }
+
+//
+// Difference Creation
+//
+
+Expression * SF::makeDifference(Expression * minuend,Expression * subtrahend){
+  Expression * subtrahend_expr = new ProductExpression(new RationalExpression(-1),subtrahend->clone());
+  return new SumExpression(minuend->clone(),subtrahend_expr);
+}
+
+
+//
+// Quotent Creation
+//
+
+Expression * SF::makeQuotent(Expression * dividend,Expression * divisor){
+  Expression * divisor_expr = new ExponentExpression(divisor->clone(),new RationalExpression(-1));
+  return new ProductExpression(dividend->clone(),divisor_expr);
+}
+
 

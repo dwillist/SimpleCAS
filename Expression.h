@@ -129,7 +129,7 @@ protected:
   */
   virtual Expression* getOperand(std::size_t pos) const;
   
-  Expression * Expression::getClone(std::size_t pos) const;
+  Expression * getClone(std::size_t pos) const;
 
 
   //

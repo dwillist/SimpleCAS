@@ -8,6 +8,8 @@
 #include "Expression.h"
 #include "SimplifyFunctions.h"
 #include "FunctionTags.h"
+#include "ProductExpression.h"
+#include "RationalExpression.h"
 
 namespace SF = SimplifyFunctions;
 namespace BM = boost::multiprecision;
@@ -77,15 +79,18 @@ Expression * LogExpression::simplify(){
   }
   else{
     std::cout<< "Error log simplification not found" << std::endl;
+    return 0;
   }
 }
 
 Expression * LogExpression::derivative(std::string with_respect_to){
   // need lots of parts to do this
-  Expression * base_derivative = getOperand(0)->derivative(with_respect_to);
   Expression * argument_derivative = getOperand(1)->derivative(with_respect_to);
   Expression * base_clone = getOperand(0)->clone();
   Expression * argument_clone = getOperand(1)->clone();
+  
+  Expression * denom_product = new ProductExpression(argument_clone,SF::makeNaturalLog(base_clone));
+  return new ProductExpression(argument_derivative,SF::makeQuotent(new RationalExpression(1), denom_product));
   
 }
 

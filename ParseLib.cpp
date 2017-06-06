@@ -11,6 +11,7 @@
 #include "SumExpression.h"
 #include "ProductExpression.h"
 #include "ExponentExpression.h"
+#include "LogExpression.h"
 #include "UndefinedExpression.h"
 #include "SimplifyFunctions.h"
 
@@ -32,7 +33,11 @@ bool PL::isCloseParen(std::string c){
 
 bool PL::isRational(std::string & s){
   bool slash = false;
-  for(std::size_t i =0; i < s.size(); ++i){
+  std::size_t i = 0;
+  if(s[i] == '-'){
+    ++i;
+  }
+  for(; i < s.size(); ++i){
     if(s[i] == '/'){
       if(slash){
         return false;
@@ -68,6 +73,10 @@ bool PL::isExponentSymbol(std::string & s){
   return s == FT::tag_to_print[FT::EXPONENT];
 }
 
+bool PL::isLogorithmSymbol(std::string & s){
+  return s == FT::tag_to_print[FT::LOGORITHM];
+}
+
 Expression * PL::makeSum(std::vector<Expression *> expression_vec){
   return new SumExpression(expression_vec);
 }
@@ -86,6 +95,10 @@ Expression * PL::makeRational(std::string & rational_string){
   }
   throw "non rational name";
   return 0;
+}
+
+Expression * PL::makeLogorithm(std::vector<Expression *> expression_vec){
+  return new LogExpression(expression_vec);
 }
 
 Expression * PL::makeVariable(std::string & variable_string){
@@ -119,6 +132,9 @@ Expression * PL::makeExpression(std::vector<std::string> & s_vector, std::size_t
     }
     else if(PL::isExponentSymbol(s_vector[pos])){
       expression_build = PL::makeExponent;
+    }
+    else if (PL::isLogorithmSymbol(s_vector[pos])){
+      expression_build = PL::makeLogorithm;
     }
     else if(PL::isVariable(s_vector[pos])){
       expressions.push_back(PL::makeVariable(s_vector[pos]));

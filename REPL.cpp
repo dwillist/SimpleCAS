@@ -23,8 +23,11 @@ int main(){
     std::cout << to_print->toString() << std::endl;
     std::cout << "post simplification" <<std::endl;
     std::cout << to_print->simplify()->toString() << std::endl;
-    std::cout << "post Derivative wrt x" <<std::endl;
-    std::cout << to_print->derivative("x")->simplify()->toString() << std::endl;
+    Expression * deriv = to_print->derivative("x");
+    std::cout << "post Derivative wrt x: " << deriv->toString() <<std::endl;
+    Expression * deriv_simp = deriv->simplify();
+    std::cout << "simplified derivative" << std::endl;
+    std::cout << deriv_simp->toString() << std::endl;
     
   }
 }

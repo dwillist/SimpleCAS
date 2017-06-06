@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 
+#include "UndefinedExpression.h"
 #include "SumExpression.h"
 #include "ProductExpression.h"
 #include "Expression.h"
@@ -66,7 +67,13 @@ Expression * ProductExpression::simplify(){
 }
 
 Expression * ProductExpression::derivative(std::string with_respect_to){
-  ProductExpression * lhs = new ProductExpression(operands[0]->derivative(with_respect_to),clone(1,size()));
-  ProductExpression * rhs = new ProductExpression(operands[0],clone(1,size())->derivative(with_respect_to));
-  return new SumExpression(lhs,rhs);
+  if(size() >= 2){
+    ProductExpression * lhs = new ProductExpression(operands[0]->derivative(with_respect_to),clone(1,size()));
+    ProductExpression * rhs = new ProductExpression(operands[0]->clone(),clone(1,size())->derivative(with_respect_to));
+    return new SumExpression(lhs,rhs);
+  }
+  else if( size() == 1){
+    return getOperand(0)->derivative(with_respect_to);
+  }
+  return new UndefinedExpression(this);
 }
