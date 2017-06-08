@@ -208,7 +208,7 @@ Expression * Expression::simplify(){
 std::vector<Expression *> Expression::clone_operands(std::size_t begin,std::size_t end) const{
   std::vector<Expression *> to_return;
   for(std::size_t i = begin; i < end; ++i){
-    to_return.push_back(getOperand(i)->clone());
+    to_return.push_back(getClone(i));
   }
   return to_return;
 }
