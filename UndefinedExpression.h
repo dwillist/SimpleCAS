@@ -17,8 +17,8 @@ class UndefinedExpression : public Expression{
     // CONSTRUCTORS
     //
 
-    UndefinedExpression(std::vector<Expression * > undefined_operands);
-    UndefinedExpression(Expression * E); // wrapping constructor
+    UndefinedExpression(std::vector<std::unique_ptr<Expression>  > undefined_operands);
+    UndefinedExpression(std::unique_ptr<Expression>  E); // wrapping constructor
     // have to watch out for this copy constructor it probably does not do what you want
     // as it basically erases the operation and replaces it with undefined
     UndefinedExpression(const Expression & E);
@@ -33,18 +33,18 @@ class UndefinedExpression : public Expression{
 
     virtual boost::multiprecision::cpp_rational getValue() const;
 
-    virtual Expression * simplify();
+    virtual std::unique_ptr<Expression>  simplify();
   
-    virtual Expression * derivative(std::string with_respect_to);
+    virtual std::unique_ptr<Expression>  derivative(std::string with_respect_to);
 
 
     //
     // DeepCopy Functions
     //
 
-    virtual Expression * clone() const;
+    virtual std::unique_ptr<Expression>  clone() const;
 
-    virtual Expression * clone(std::size_t begin, std::size_t end) const;
+    virtual std::unique_ptr<Expression>  clone(std::size_t begin, std::size_t end) const;
 
 
 };
@@ -53,7 +53,7 @@ class UndefinedExpression : public Expression{
 // helper functions
 //
 
-std::vector<Expression * > wrapWithVector(Expression * E);
+std::vector<std::unique_ptr<Expression>  > wrapWithVector(std::unique_ptr<Expression>  E);
 
 
 #endif

@@ -16,7 +16,7 @@ protected:
     bool associative;
     boost::multiprecision::cpp_rational value;
     std::string var_name;
-    std::vector<Expression*> operands;
+    std::vector<std::unique_ptr<Expression> > operands;
 
   public:
     ///
@@ -30,12 +30,15 @@ protected:
       bool associative_bool,
       boost::multiprecision::cpp_rational value_rational = boost::multiprecision::cpp_rational(),
       std::string var_name_string = std::string(),
-      std::vector<Expression*> operands_vector = std::vector<Expression*>()
+      std::vector<std::unique_ptr<Expression> > operands_vector = std::vector<std::unique_ptr<Expression> >()
     );
 
     // NOTE: this is a shallow copy and extreamly unsafe
     // test if we can make this a deep copy
     Expression(const Expression & E); // copy constructor
+  
+    // Move constructor
+    Expression(Expression && other);
 
     //
     // Destructor
@@ -127,38 +130,59 @@ protected:
     params: zero indexed position of operand to get
     return: pointer to pos'th operand in Expression
   */
-  virtual Expression* getOperand(std::size_t pos) const;
-  
-  Expression * getClone(std::size_t pos) const;
+  virtual std::unique_ptr<Expression> getOperand(std::size_t pos) const;
+
+  std::unique_ptr<Expression> getClone(std::size_t pos) const;
 
 
   //
   // CAS functions
   //
 
-  virtual Expression * simplify();
-  
-  virtual Expression * derivative(std::string with_respect_to);
+  virtual std::unique_ptr<Expression> simplify();
+
+  virtual std::unique_ptr<Expression> derivative(std::string with_respect_to);
 
 
   //
   // DeepCopy Functions
   //
 
-  virtual Expression * clone() const;
+  virtual std::unique_ptr<Expression> clone() const;
 
-  virtual Expression * clone(std::size_t begin, std::size_t end) const;
+  virtual std::unique_ptr<Expression> clone(std::size_t begin, std::size_t end) const;
 
   //
   // Helper Functions;
   //
 
 
-  std::vector<Expression *> clone_operands(std::size_t begin,std::size_t end) const;
+  std::vector<std::unique_ptr<Expression>> clone_operands(std::size_t begin,std::size_t end) const;
 
-  // TODO: might want to make this a private member
 };
 
-void deletePtrVec(std::vector<Expression * > to_delete);
+void deletePtrVec(std::vector<std::unique_ptr<Expression> > to_delete);
+
+//
+//Arithmetic operators
+//
+
+std::unique_ptr<Expression> operator+(std::unique_ptr<Expression> const & lhs,
+                                      std::unique_ptr<Expression> const & rhs);
+
+std::unique_ptr<Expression> operator-(std::unique_ptr<Expression> const & lhs,
+                                      std::unique_ptr<Expression> const & rhs);
+
+std::unique_ptr<Expression> operator*(std::unique_ptr<Expression> const & lhs,
+                                      std::unique_ptr<Expression> const & rhs);
+
+std::unique_ptr<Expression> operator/(std::unique_ptr<Expression> const & lhs,
+                                      std::unique_ptr<Expression> const & rhs);
+
+std::unique_ptr<Expression> log(std::unique_ptr<Expression> const & lhs,
+                                      std::unique_ptr<Expression> const & rhs);
+
+std::unique_ptr<Expression> exp(std::unique_ptr<Expression> const & lhs,
+                                      std::unique_ptr<Expression> const & rhs);
 
 #endif

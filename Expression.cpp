@@ -8,6 +8,12 @@
 #include "FunctionTags.h"
 #include "Expression.h"
 
+#include "RationalExpression.h"
+#include "SumExpression.h"
+#include "ProductExpression.h"
+#include "ExponentExpression.h"
+#include "LogExpression.h"
+
 ///
 /// CONSTRUCTORS
 ///
@@ -20,7 +26,7 @@ Expression::Expression(
     bool associative_bool,
     boost::multiprecision::cpp_rational value_rational,
     std::string var_name_string,
-    std::vector<Expression*> operands_vector
+    std::vector<std::unique_ptr<Expression>> operands_vector
   ) :
       tag(tag_string),
       max_operands(max_operands_size_t),
@@ -29,7 +35,7 @@ Expression::Expression(
       associative(associative_bool),
       value(value_rational),
       var_name(var_name_string),
-      operands(operands_vector)
+      operands(std::move(operands_vector))
       {
         if(size() > max_operands || size() < min_operands){
           throw "invalid number of arguments to Expression constructor";
@@ -45,21 +51,34 @@ Expression::Expression(const Expression & other){
     communative = other.communative;
     value = other.value;
     var_name = other.var_name;
-    deletePtrVec(operands);
+    deletePtrVec(std::move(operands));
     operands = other.clone_operands(0,other.size());
-    //for(Expression* operand : other.operands){
+    //for(std::unique_ptr<Expression> operand : other.operands){
       //operands
     //}
   }
 }
 
+// Move constructor
+Expression::Expression(Expression && other):
+tag(std::move(other.tag)),
+max_operands(std::move(other.max_operands)),
+min_operands(std::move(other.min_operands)),
+associative(std::move(other.associative)),
+communative(std::move(other.communative)),
+value(std::move(other.value)),
+var_name(std::move(other.var_name)){
+  deletePtrVec(std::move(operands));
+  operands = other.clone_operands(0,other.size());
+}
+
+///
+/// Destructor
+///
 
 Expression::~Expression(){
-  for( Expression*& E : operands){
-    if( E != 0){
-      delete E;
-      E = 0;
-    }
+  for( std::unique_ptr<Expression>& E : operands){
+    E.reset();
   }
 }
 
@@ -99,7 +118,7 @@ std::string Expression::getName() const{
 
 std::string Expression::toString() const{
   std::string to_return = "";
-  for(Expression* operand : operands){
+  for(std::unique_ptr<Expression> const & operand : operands){
     to_return += " " + operand->toString();
   }
   return "( " + FunctionTags::tag_to_print[getTag()] + to_return + " )";
@@ -138,7 +157,7 @@ Expression& Expression::operator=(const Expression & other){
 bool Expression::operator==(const Expression& rhs) const{
   if(getTag() == rhs.getTag() && size() == rhs.size()){
     for(int i = 0; i < size(); ++i){
-      if(this->operands[i] != rhs.operands[i]){ //
+      if(getOperand(i) != rhs.getOperand(i)){ //
         return false;
       }
     }
@@ -156,11 +175,11 @@ bool Expression::operator< (const Expression& rhs) const{
   int rhs_prec = FunctionTags::precidence_map[rhs.getTag()];
   if(lhs_prec == rhs_prec){ //should work
     for(int i = 0; i < std::min(size(),rhs.size()); ++i){
-      if(operands[i] == rhs.operands[i]){
+      if(getOperand(i) == rhs.getOperand(i)){
         continue;
       }
       else{
-        return operands[i] < rhs.operands[i];
+        return getOperand(i) < getOperand(i);
       }
     }
     return size() < rhs.size();
@@ -179,25 +198,27 @@ bool Expression::operator>=(const Expression& rhs) const{
   return (*this > rhs) || (*this == rhs);
 }
 
-Expression* Expression::getOperand(std::size_t pos) const{
-  return operands[pos];
+
+//TODO: fix this and below deffinition
+std::unique_ptr<Expression> Expression::getOperand(std::size_t pos) const{
+  return operands[pos]->clone();
 }
 
-Expression * Expression::getClone(std::size_t pos) const{
-  return getOperand(pos)->clone();
-}
+//std::unique_ptr<Expression> Expression::getClone(std::size_t pos) const{
+  //return operands[pos]->clone();
+//}
 
 
 //
 // CAS functions
 //
 
-Expression * Expression::simplify(){
-  return this -> clone();
+std::unique_ptr<Expression> Expression::simplify(){
+  return clone();
 }
 
- Expression * Expression::derivative(std::string with_respect_to){
-  return this->clone();
+ std::unique_ptr<Expression> Expression::derivative(std::string with_respect_to){
+  return clone();
 }
 
 
@@ -205,25 +226,66 @@ Expression * Expression::simplify(){
 // Helper Functions
 //
 
-std::vector<Expression *> Expression::clone_operands(std::size_t begin,std::size_t end) const{
-  std::vector<Expression *> to_return;
-  for(std::size_t i = begin; i < end; ++i){
+std::vector<std::unique_ptr<Expression> > Expression::clone_operands(std::size_t begin,std::size_t end) const{
+  std::vector<std::unique_ptr<Expression> > to_return;
+  for(std::size_t i = begin; i < std::min(end,size()); ++i){
     to_return.push_back(getClone(i));
   }
   return to_return;
 }
 
-Expression * Expression::clone(std::size_t begin,std::size_t end) const{
+std::unique_ptr<Expression> Expression::clone(std::size_t begin,std::size_t end) const{
   throw "base Expression should not be cloned";
 }
-Expression * Expression::clone() const{
+std::unique_ptr<Expression> Expression::clone() const{
   throw "base Expression should not be cloned";
 }
 
-void deletePtrVec(std::vector<Expression * > to_delete){
-  for(Expression*& operand : to_delete ){
-    delete operand; // should recurively delete all operands in our Expression Tree
-    operand = 0; // set pointer to null
+void deletePtrVec(std::vector<std::unique_ptr<Expression> > to_delete){
+  for(std::unique_ptr<Expression>& operand : to_delete ){
+    operand.reset(); // should recurively delete all operands in our Expression Tree
   }
   to_delete.clear();
 }
+
+
+//
+//Arithmetic operators
+//
+
+std::unique_ptr<Expression> operator+(std::unique_ptr<Expression> const & lhs,
+                                      std::unique_ptr<Expression> const & rhs){
+  return std::unique_ptr(new SumExpression(lhs->clone(),rhs->clone()));
+}
+
+std::unique_ptr<Expression> operator-(std::unique_ptr<Expression> const & lhs,
+                                      std::unique_ptr<Expression> const & rhs){
+  std::unique_ptr<Expression> neg_rational(new RationalExpression(-1));
+  std::unique_ptr<Expression> neg_product(rhs * neg_rational);
+  return std::unique_ptr<Expression>(new SumExpression(lhs->clone(),std::move(neg_product)));
+}
+
+std::unique_ptr<Expression> operator*(std::unique_ptr<Expression> const & lhs,
+                                      std::unique_ptr<Expression> const & rhs){
+  return std::unique_ptr<Expression>(new ProductExpression(lhs->clone(),rhs->clone()));
+}
+
+
+std::unique_ptr<Expression> operator/(std::unique_ptr<Expression> const & lhs,
+                                      std::unique_ptr<Expression> const & rhs){
+  std::unique_ptr<Expression> neg_rational(new RationalExpression(-1));
+  std::unique_ptr<Expression> neg_exp(exp(rhs->clone(),neg_rational));
+  return std::unique_ptr<Expression>(new ExponentExpression(lhs->clone(),std::move(neg_exp)));
+}
+
+std::unique_ptr<Expression> log(std::unique_ptr<Expression> const & lhs,
+                                std::unique_ptr<Expression> const & rhs){
+  return std::unique_ptr<Expression>(new LogExpression(lhs->clone(),rhs->clone()));
+}
+
+std::unique_ptr<Expression> exp(std::unique_ptr<Expression> const & lhs,
+                                std::unique_ptr<Expression> const & rhs){
+  return std::unique_ptr<Expression>(new SumExpression(lhs->clone(),rhs->clone()));
+
+
+

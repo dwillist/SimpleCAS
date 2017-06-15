@@ -45,18 +45,18 @@ class VariableExpression : public Expression{
     // CAS functions
     //
 
-    virtual Expression * simplify();
+    virtual std::unique_ptr<Expression> simplify();
   
-    virtual Expression * derivative(std::string with_respect_to);
+    virtual std::unique_ptr<Expression> derivative(std::string with_respect_to);
 
 
     //
     // DeepCopy Functions
     //
 
-    virtual Expression * clone() const;
+    virtual std::unique_ptr<Expression> clone() const;
 
-    virtual Expression * clone(std::size_t begin, std::size_t end) const;
+    virtual std::unique_ptr<Expression> clone(std::size_t begin, std::size_t end) const;
 };
 
 

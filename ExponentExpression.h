@@ -16,9 +16,11 @@ class ExponentExpression : public Expression{
     // CONSTRUCTORS
     //
 
-    ExponentExpression(std::vector<Expression * > exponent_operands);
-    ExponentExpression(Expression * base,Expression * exponent);
+    ExponentExpression(std::vector<std::unique_ptr<Expression> > exponent_operands);
+    ExponentExpression(std::unique_ptr<Expression> base,std::unique_ptr<Expression> exponent);
     ExponentExpression(const Expression & E);
+    ExponentExpresion(Expression && other);
+  
 
     /**
       params: None
@@ -27,16 +29,16 @@ class ExponentExpression : public Expression{
     virtual boost::multiprecision::cpp_rational getValue() const;
 
 
-    virtual Expression * clone() const;
+    virtual std::unique_ptr<Expression> clone() const;
 
-    virtual Expression * clone(std::size_t begin, std::size_t end) const;
+    virtual std::unique_ptr<Expression> clone(std::size_t begin, std::size_t end) const;
     //
     // CAS functions
     //
 
-    virtual Expression * simplify();
+    virtual std::unique_ptr<Expression> simplify();
   
-    virtual Expression * derivative(std::string with_respect_to);
+    virtual std::unique_ptr<Expression> derivative(std::string with_respect_to);
 
 };
 

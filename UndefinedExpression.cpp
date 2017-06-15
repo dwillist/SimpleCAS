@@ -13,7 +13,7 @@
   //
 
 
-UndefinedExpression::UndefinedExpression(std::vector<Expression * > undefined_operands):
+UndefinedExpression::UndefinedExpression(std::vector<std::unique_ptr<Expression>  > undefined_operands):
   Expression(
     FunctionTags::UNDEFINED,
     1,
@@ -25,7 +25,7 @@ UndefinedExpression::UndefinedExpression(std::vector<Expression * > undefined_op
     undefined_operands)
     {}
 
-UndefinedExpression::UndefinedExpression(Expression * E) :
+UndefinedExpression::UndefinedExpression(std::unique_ptr<Expression>  E) :
   UndefinedExpression(wrapWithVector(E)){}
 
 //
@@ -35,12 +35,12 @@ UndefinedExpression::UndefinedExpression(const Expression & E) : Expression(E){
 
 
 
-Expression * UndefinedExpression::clone() const{
+std::unique_ptr<Expression>  UndefinedExpression::clone() const{
   return clone(0,size());
 }
 
-Expression * UndefinedExpression::clone(std::size_t begin, std::size_t end) const{
-  return new UndefinedExpression(clone_operands(begin,end));
+std::unique_ptr<Expression>  UndefinedExpression::clone(std::size_t begin, std::size_t end) const{
+  return std::unique_ptr<Expression>(new UndefinedExpression(clone_operands(begin,end)));
 }
 //
 // CAS functions
@@ -51,19 +51,19 @@ boost::multiprecision::cpp_rational UndefinedExpression::getValue() const{
   throw "UndefinedExpression has no value";
 }
 
-Expression * UndefinedExpression::UndefinedExpression::simplify(){
-  return new UndefinedExpression(operands[0]->simplify());
+std::unique_ptr<Expression>  UndefinedExpression::UndefinedExpression::simplify(){
+  return std::unique_ptr<Expression>(new UndefinedExpression(operands[0]->simplify()));
 }
 
-Expression * UndefinedExpression::derivative(std::string with_respect_to){
-  return new UndefinedExpression(operands[0]->derivative(with_respect_to));
+std::unique_ptr<Expression>  UndefinedExpression::derivative(std::string with_respect_to){
+  return std::unique_ptr<Expression>(new UndefinedExpression(operands[0]->derivative(with_respect_to)));
 }
 
 
 
 
-std::vector<Expression * > wrapWithVector(Expression * E){
-  std::vector<Expression *> to_return;
+std::vector<std::unique_ptr<Expression>  > wrapWithVector(std::unique_ptr<Expression>  E){
+  std::vector<std::unique_ptr<Expression> > to_return;
   to_return.push_back(E);
   return to_return;
 }

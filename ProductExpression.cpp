@@ -17,7 +17,7 @@ namespace SF = SimplifyFunctions;
 // CONSTRUCTORS
 //
 
-ProductExpression::ProductExpression(std::vector<Expression * > product_operands) :
+ProductExpression::ProductExpression(std::vector<std::unique_ptr<Expression>  > product_operands) :
   Expression(FunctionTags::PRODUCT,
     -1, // this is max value of size_t due to two's complement
     0,
@@ -33,16 +33,16 @@ ProductExpression::ProductExpression(const Expression & E) : Expression(E){
   }
 
 // binary constructor
-ProductExpression::ProductExpression(Expression * E1, Expression * E2) :
+ProductExpression::ProductExpression(std::unique_ptr<Expression>  E1, std::unique_ptr<Expression>  E2) :
   ProductExpression(SimplifyFunctions::buildBinaryVector(E1,E2)){}
 
 
-Expression * ProductExpression::clone() const{
+std::unique_ptr<Expression>  ProductExpression::clone() const{
   return clone(0,size());
 }
 
-Expression * ProductExpression::clone(std::size_t begin, std::size_t end) const{
-  Expression * to_return = new ProductExpression(clone_operands(begin,end));
+std::unique_ptr<Expression>  ProductExpression::clone(std::size_t begin, std::size_t end) const{
+  std::unique_ptr<Expression>  to_return(new ProductExpression(clone_operands(begin,end)));
   return to_return->simplify();
 }
 
@@ -50,30 +50,30 @@ Expression * ProductExpression::clone(std::size_t begin, std::size_t end) const{
 // CAS functions
 //
 
-Expression * ProductExpression::simplify(){
+std::unique_ptr<Expression>  ProductExpression::simplify(){
   if(size() == 1){
     return getOperand(0)->clone();
   }
   else{
-    std::vector<Expression *> simp_ops;
+    std::vector<std::unique_ptr<Expression> > simp_ops;
     for(std::size_t i = 0; i < size(); ++i){
       simp_ops.push_back(getOperand(i)->simplify());
     }
-    Expression * new_prod = SimplifyFunctions::levelReduce(
+    std::unique_ptr<Expression>  new_prod = SimplifyFunctions::levelReduce(
             new ProductExpression(simp_ops),
             SF::product_create_function);
     return SF::productSimplify(new_prod);
   }
 }
 
-Expression * ProductExpression::derivative(std::string with_respect_to){
+std::unique_ptr<Expression>  ProductExpression::derivative(std::string with_respect_to){
   if(size() >= 2){
-    ProductExpression * lhs = new ProductExpression(operands[0]->derivative(with_respect_to),clone(1,size()));
-    ProductExpression * rhs = new ProductExpression(operands[0]->clone(),clone(1,size())->derivative(with_respect_to));
-    return new SumExpression(lhs,rhs);
+    std::unique_ptr<Expression>  lhs(new ProductExpression(operands[0]->derivative(with_respect_to),clone(1,size())));
+    std::unique_ptr<Expression>  rhs(new ProductExpression(operands[0]->clone(),clone(1,size())->derivative(with_respect_to)));
+    return std::unique_ptr<Expression>(new SumExpression(std::move(lhs),std::move(rhs)));
   }
   else if( size() == 1){
     return getOperand(0)->derivative(with_respect_to);
   }
-  return new UndefinedExpression(this);
+  return std::unique_ptr<Expression>(new UndefinedExpression(this));
 }

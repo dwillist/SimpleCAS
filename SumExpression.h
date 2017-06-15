@@ -18,9 +18,9 @@ class SumExpression : public Expression{
     // CONSTRUCTORS
     //
 
-    SumExpression(std::vector<Expression * > sum_operands);
+    SumExpression(std::vector<std::unique_ptr<Expression>  > sum_operands);
     SumExpression(const Expression & E);
-    SumExpression(Expression * E1, Expression * E2); // binary sum constructor
+    SumExpression(std::unique_ptr<Expression>  E1, std::unique_ptr<Expression>  E2); // binary sum constructor
     SumExpression(const Expression & E,std::size_t begin,std::size_t end);
 
 
@@ -34,18 +34,18 @@ class SumExpression : public Expression{
     // CAS functions
     //
 
-    virtual Expression * simplify();
+    virtual std::unique_ptr<Expression>  simplify();
   
-    virtual Expression * derivative(std::string with_respect_to);
+    virtual std::unique_ptr<Expression>  derivative(std::string with_respect_to);
 
 
     //
     // DeepCopy Functions
     //
 
-    virtual Expression * clone() const;
+    virtual std::unique_ptr<Expression>  clone() const;
 
-    virtual Expression * clone(std::size_t begin, std::size_t end) const;
+    virtual std::unique_ptr<Expression>  clone(std::size_t begin, std::size_t end) const;
 
 };
 

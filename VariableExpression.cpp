@@ -71,25 +71,25 @@ Expression* VariableExpression::getOperand(int pos){
 // CAS functions
 //
 
-Expression * VariableExpression::simplify(){
+std::unique_ptr<Expression>  VariableExpression::simplify(){
   return clone();
 }
 
-Expression * VariableExpression::derivative(std::string with_respect_to){
+std::unique_ptr<Expression>  VariableExpression::derivative(std::string with_respect_to){
   if(getName() == with_respect_to){
-    return new RationalExpression(1);
+    return std::unique_ptr<Expression>(new RationalExpression(1));
   }
-  return new RationalExpression(0);
+  return std::unique_ptr<Expression>(new RationalExpression(0));
 }
 
 //
 // DeepCopy Functions
 //
 
-Expression * VariableExpression::clone() const{
+std::unique_ptr<Expression>  VariableExpression::clone() const{
   return clone(0,size());
 }
 
-Expression * VariableExpression::clone(std::size_t begin, std::size_t end) const{
-  return new VariableExpression(this->getName());
+std::unique_ptr<Expression>  VariableExpression::clone(std::size_t begin, std::size_t end) const{
+  return std::unique_ptr<Expression>(new VariableExpression(this->getName()));
 }

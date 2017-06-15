@@ -14,12 +14,12 @@ RationalExpression::RationalExpression(boost::multiprecision::cpp_rational R) :
   Expression(FunctionTags::RATIONAL,0,0,false,false,R) // rest of args we let be default see Expression constructor
   {}
 
-Expression * RationalExpression::clone() const{
+std::unique_ptr<Expression> RationalExpression::clone() const{
   return clone(0,size());
 }
 
-Expression * RationalExpression::clone(std::size_t begin, std::size_t end) const{
-  return new RationalExpression(this->getValue());
+std::unique_ptr<Expression> RationalExpression::clone(std::size_t begin, std::size_t end) const{
+  return std::unique_ptr<Expression>(new RationalExpression(this->getValue()));
 }
 
 //overwritten functions
@@ -78,10 +78,10 @@ Expression* RationalExpression::getOperand(int pos){
 // CAS functions
 //
 
- Expression * RationalExpression::simplify(){
+ std::unique_ptr<Expression> RationalExpression::simplify(){
   return clone();
 }
 
-Expression * RationalExpression::derivative(std::string with_respect_to){
-  return new RationalExpression(0);
+std::unique_ptr<Expression> RationalExpression::derivative(std::string with_respect_to){
+  return std::unique_ptr<Expression>(new RationalExpression(0));
 }

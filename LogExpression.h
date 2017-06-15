@@ -15,8 +15,8 @@ public:
   // CONSTRUCTORS
   //
   
-  LogExpression(std::vector<Expression * > exponent_operands);
-  LogExpression(Expression * base,Expression * argument);
+  LogExpression(std::vector<std::unique_ptr<Expression>  > exponent_operands);
+  LogExpression(std::unique_ptr<Expression> base,std::unique_ptr<Expression> argument);
   LogExpression(const Expression & E);
   
   /**
@@ -26,17 +26,17 @@ public:
   virtual boost::multiprecision::cpp_rational getValue() const;
   
   
-  virtual Expression * clone() const;
+  virtual std::unique_ptr<Expression>  clone() const;
   
-  virtual Expression * clone(std::size_t begin, std::size_t end) const;
+  virtual std::unique_ptr<Expression>  clone(std::size_t begin, std::size_t end) const;
   
   //
   // CAS functions
   //
   
-  virtual Expression * simplify();
+  virtual std::unique_ptr<Expression>  simplify();
   
-  virtual Expression * derivative(std::string with_respect_to);
+  virtual std::unique_ptr<Expression>  derivative(std::string with_respect_to);
   
 };
 

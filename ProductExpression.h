@@ -14,26 +14,26 @@ class ProductExpression : public Expression{
     // CONSTRUCTORS
     //
 
-    ProductExpression(std::vector<Expression * > product_operands);
+    ProductExpression(std::vector<std::unique_ptr<Expression>  > product_operands);
     ProductExpression(const Expression & E);
-    ProductExpression(Expression * E1, Expression * E2); //binary constructor
+    ProductExpression(std::unique_ptr<Expression>  E1, std::unique_ptr<Expression>  E2); //binary constructor
     ProductExpression(const Expression & E,std::size_t begin,std::size_t end);
 
     //
     // CAS functions
     //
 
-    virtual Expression * simplify();
+    virtual std::unique_ptr<Expression>  simplify();
 
-    virtual Expression * derivative(std::string with_respect_to);
+    virtual std::unique_ptr<Expression>  derivative(std::string with_respect_to);
 
     //
     // DeepCopy Functions
     //
 
-    virtual Expression * clone() const;
+    virtual std::unique_ptr<Expression> clone() const;
 
-    virtual Expression * clone(std::size_t begin, std::size_t end) const;
+    virtual std::unique_ptr<Expression> clone(std::size_t begin, std::size_t end) const;
 
 };
 
