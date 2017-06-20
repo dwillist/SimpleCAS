@@ -32,7 +32,7 @@ ExponentExpression::ExponentExpression(std::vector<std::unique_ptr<Expression> >
     {}
 
 ExponentExpression::ExponentExpression(std::unique_ptr<Expression> base,std::unique_ptr<Expression> exponent) :
-  ExponentExpression(SF::buildBinaryVector(base,exponent)){}
+  ExponentExpression(SF::makeBinaryVector(base,exponent)){}
 
 ExponentExpression::ExponentExpression(const Expression & E) : Expression(E){
     tag = FT::EXPONENT;
@@ -93,7 +93,7 @@ std::unique_ptr<Expression> ExponentExpression::derivative(std::string with_resp
   std::unique_ptr<Expression> exp_derivative(getOperand(1)->derivative(with_respect_to));
   std::unique_ptr<Expression> base_clone(getOperand(0)->clone());
   std::unique_ptr<Expression> exp_clone(getOperand(1)->clone());
-  
+
   std::unique_ptr<Expression> first_prod(
                                       new ProductExpression( base_derivative->clone(), SF::makeQuotent(exp_clone->clone(),base_clone->clone()))
                                          );

@@ -15,6 +15,7 @@ class DifferenceExpression : public Expression{
     DifferenceExpression(std::vector<Expression * > sum_operands);
     DifferenceExpression(const DifferenceExpression & R); // Copy constuctor
     DifferenceExpression(const Expression & E); // conversion of arbitrary expression to sum
+    DifferenceExpression(Expression && other);
 
     //
     // Dtor

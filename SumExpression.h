@@ -22,6 +22,7 @@ class SumExpression : public Expression{
     SumExpression(const Expression & E);
     SumExpression(std::unique_ptr<Expression>  E1, std::unique_ptr<Expression>  E2); // binary sum constructor
     SumExpression(const Expression & E,std::size_t begin,std::size_t end);
+    SumExpression(Expression && E);
 
 
     // See Base class comments
@@ -35,7 +36,7 @@ class SumExpression : public Expression{
     //
 
     virtual std::unique_ptr<Expression>  simplify();
-  
+
     virtual std::unique_ptr<Expression>  derivative(std::string with_respect_to);
 
 

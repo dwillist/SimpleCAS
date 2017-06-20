@@ -9,6 +9,9 @@
 
 #include <vector>
 
+// Note:
+// all simplify and make functions consume the pointers passed to them
+
 namespace SimplifyFunctions{
 // Simplify verbosity
   namespace BM = boost::multiprecision;
@@ -26,11 +29,11 @@ namespace SimplifyFunctions{
   bool isSum(std::unique_ptr<Expression> const & expr);
 
   bool isProduct(std::unique_ptr<Expression> const & expr);
-  
+
   bool isLogorithm(std::unique_ptr<Expression> const & expr);
 
-  std::vector<std::unique_ptr<Expression> > buildBinaryVector(std::unique_ptr<Expression> const &  E1,
-                                                              std::unique_ptr<Expression> const &  E2);
+  std::vector<std::unique_ptr<Expression> > makeBinaryVector(std::unique_ptr<Expression> E1,
+                                                              std::unique_ptr<Expression> E2);
 
   bool ptrLessThan(std::unique_ptr<Expression> const & lhs, std::unique_ptr<Expression> const & rhs);
 
@@ -49,20 +52,20 @@ namespace SimplifyFunctions{
     params: two expressions representing the base and exponenet of an ExponentExpression
     return: Expression of
   */
-  std::unique_ptr<Expression> makeUndefinedExponenet(std::unique_ptr<Expression> const & base,
-                                                      std::unique_ptr<Expression> const & exponent);
+  std::unique_ptr<Expression> makeUndefinedExponenet(std::unique_ptr<Expression> base,
+                                                      std::unique_ptr<Expression> exponent);
 
   bool simplifiableToRational(std::unique_ptr<Expression> const & base,
                               std::unique_ptr<Expression> const & exponent);
 
-  std::unique_ptr<Expression> simplifyBothRational(std::unique_ptr<Expression> const & base,
-                                                    std::unique_ptr<Expression> const & exponent);
+  std::unique_ptr<Expression> simplifyBothRational(std::unique_ptr<Expression> base,
+                                                    std::unique_ptr<Expression> exponent);
 
-  std::unique_ptr<Expression> simplifyBaseRational(std::unique_ptr<Expression> const & base,
-                                                    std::unique_ptr<Expression> const & exponent);
+  std::unique_ptr<Expression> simplifyBaseRational(std::unique_ptr<Expression> base,
+                                                    std::unique_ptr<Expression> exponent);
 
-  std::unique_ptr<Expression> simplifyExponentRational(std::unique_ptr<Expression> const & base,
-                                                        std::unique_ptr<Expression> const & exponent);
+  std::unique_ptr<Expression> simplifyExponentRational(std::unique_ptr<Expression> base,
+                                                        std::unique_ptr<Expression> exponent);
 
   /**
     params: a rational base and a rational (with 1 as the denominator) integer_exponent
@@ -70,8 +73,8 @@ namespace SimplifyFunctions{
       -watch out conversion could be very lossy due to forced conversion from
       integer_exponent to type int (anything larger results in uncomputable exponenets)
   */
-  RationalExpression* rational_pow(std::unique_ptr<Expression> const & base,
-                                   std::unique_ptr<Expression> const & integer_exponent);
+  RationalExpression* rational_pow(std::unique_ptr<Expression> base,
+                                   std::unique_ptr<Expression> integer_exponent);
 
   bool hasRationalExponent(std::unique_ptr<Expression> const & E);
   ///
@@ -95,7 +98,7 @@ namespace SimplifyFunctions{
    - Note if passed a RationalExpression will return the RationalExpression(0);
    - generally used to strip constants from product during factoring transformations
   */
-  std::unique_ptr<Expression>  stripConstant(std::unique_ptr<Expression> const & expr);
+  std::unique_ptr<Expression> stripConstant(std::unique_ptr<Expression> const & expr);
 
   BM::cpp_rational getConstant(std::unique_ptr<Expression> const & expr,
                                BM::cpp_rational default_val = 0);
@@ -107,70 +110,69 @@ namespace SimplifyFunctions{
   /// Level Reducer (for all associative operations)
   ///
 
-  std::unique_ptr<Expression> levelReduce(std::unique_ptr<Expression> const & to_simplify,
-                                          std::unique_ptr<Expression> const & expression_create_function( std::vector< std::unique_ptr<Expression> >)
+  std::unique_ptr<Expression> levelReduce(std::unique_ptr<Expression> to_simplify,
+                                          std::unique_ptr<Expression> expression_create_function( std::vector< std::unique_ptr<Expression> >)
                                           );
 
-  std::unique_ptr<Expression> sum_create_function(std::vector<std::unique_ptr<Expression> > const & operand_vector);
-  
+  std::unique_ptr<Expression> sum_create_function(std::vector<std::unique_ptr<Expression> > operand_vector);
+
   std::unique_ptr<Expression> product_create_function(
-                                                  std::vector<std::unique_ptr<Expression> > const & operand_vector);
+                                                  std::vector<std::unique_ptr<Expression> > operand_vector);
 
   ///
   /// Addition Reduction
   ///
 
-  std::unique_ptr<Expression> sumSimplfy(std::unique_ptr<Expression> const & E);
+  std::unique_ptr<Expression> sumSimplfy(std::unique_ptr<Expression> E);
 
   ///
   /// Product Reduction
   ///
 
-  std::unique_ptr<Expression>  productSimplify(std::unique_ptr<Expression> const & E);
+  std::unique_ptr<Expression> productSimplify(std::unique_ptr<Expression> E);
 
 
   ///
   /// Logorithm Reduction
   ///
 
-  std::unique_ptr<Expression> logorithmBothRational(std::unique_ptr<Expression> const & base,
-                                                    std::unique_ptr<Expression> const & argument);
-  
-  std::unique_ptr<Expression> logorithmNonRationalBase(std::unique_ptr<Expression> const & base,
-                                                       std::unique_ptr<Expression> const & argument);
+  std::unique_ptr<Expression> simplifyLogorithmBothRational(std::unique_ptr<Expression> base,
+                                                    std::unique_ptr<Expression> argument);
 
-  std::unique_ptr<Expression> logorithmSum(std::unique_ptr<Expression> const & base,
-                                           std::unique_ptr<Expression> const & argument);
+  std::unique_ptr<Expression> simplifyLogorithmNonRationalBase(std::unique_ptr<Expression> base,
+                                                       std::unique_ptr<Expression> argument);
 
-  std::unique_ptr<Expression> logorithmProduct(std::unique_ptr<Expression> const & base,
-                                               std::unique_ptr<Expression> const & argument);
-  
-  std::unique_ptr<Expression> logorithmExponent(std::unique_ptr<Expression> const & base,
-                                                std::unique_ptr<Expression> const & argument);
-  
-  std::unique_ptr<Expression> logorithmRational(std::unique_ptr<Expression> const & base,
-                                                std::unique_ptr<Expression> const & argument);
+  std::unique_ptr<Expression> simplifyLogorithmSum(std::unique_ptr<Expression> base,
+                                           std::unique_ptr<Expression> argument);
+
+  std::unique_ptr<Expression> simplifyLogorithmProduct(std::unique_ptr<Expression> base,
+                                               std::unique_ptr<Expression> argument);
+
+  std::unique_ptr<Expression> simplifyLogorithmExponent(std::unique_ptr<Expression> base,
+                                                std::unique_ptr<Expression> argument);
+
+  std::unique_ptr<Expression> simplifyLogorithmRational(std::unique_ptr<Expression> base,
+                                                std::unique_ptr<Expression> argument);
 
   ///
   /// Logorithm Creation
   ///
-  
-  std::unique_ptr<Expression> makeNaturalLog(std::unique_ptr<Expression> const & argument);
-  
+
+  std::unique_ptr<Expression> makeNaturalLog(std::unique_ptr<Expression> argument);
+
   //
   // Difference Creation
   //
-  
-  std::unique_ptr<Expression> makeDifference(std::unique_ptr<Expression> const & minuend,
-                                             std::unique_ptr<Expression> const & subtrahend);
-  
+
+  std::unique_ptr<Expression> makeDifference(std::unique_ptr<Expression> minuend,
+                                             std::unique_ptr<Expression> subtrahend);
+
   //
   // Quotent Creation
   //
-  
-  std::unique_ptr<Expression>  makeQuotent(std::unique_ptr<Expression> const & dividend,
-                                           std::unique_ptr<Expression> const & divisor);
-  
+
+  std::unique_ptr<Expression>  makeQuotent(std::unique_ptr<Expression> dividend,
+                                           std::unique_ptr<Expression> divisor);
 }
 
 #endif

@@ -18,6 +18,7 @@ class ProductExpression : public Expression{
     ProductExpression(const Expression & E);
     ProductExpression(std::unique_ptr<Expression>  E1, std::unique_ptr<Expression>  E2); //binary constructor
     ProductExpression(const Expression & E,std::size_t begin,std::size_t end);
+    ProductExpression(Expression && E);
 
     //
     // CAS functions

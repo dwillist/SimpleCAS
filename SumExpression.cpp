@@ -26,12 +26,17 @@ SumExpression::SumExpression(std::vector<std::unique_ptr<Expression>  > sum_oper
     {}
 
 SumExpression::SumExpression(const Expression & E) : Expression(E){
-    tag = FunctionTags::SUM;
-  }
+  tag = FunctionTags::SUM;
+}
+
+SumExpression::SumExpression(Expression && E) : Expression(E){
+  tag = FunctionTags::SUM;
+}
+
 
 
 SumExpression::SumExpression(std::unique_ptr<Expression>  E1, std::unique_ptr<Expression>  E2) :
-  SumExpression(SimplifyFunctions::buildBinaryVector(E1,E2)){}
+  SumExpression(SimplifyFunctions::makeBinaryVector(E1,E2)){}
 
 std::unique_ptr<Expression>  SumExpression::clone() const{
   return clone(0,size());

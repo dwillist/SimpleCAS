@@ -29,12 +29,16 @@ ProductExpression::ProductExpression(std::vector<std::unique_ptr<Expression>  > 
     {}
 
 ProductExpression::ProductExpression(const Expression & E) : Expression(E){
-    tag = FunctionTags::PRODUCT;
-  }
+  tag = FunctionTags::PRODUCT;
+}
+
+ProductExpression::ProductExpression(Expression && E) : Expression(E){
+  tag = FunctionTags::Product;
+}
 
 // binary constructor
 ProductExpression::ProductExpression(std::unique_ptr<Expression>  E1, std::unique_ptr<Expression>  E2) :
-  ProductExpression(SimplifyFunctions::buildBinaryVector(E1,E2)){}
+  ProductExpression(SimplifyFunctions::makeBinaryVector(E1,E2)){}
 
 
 std::unique_ptr<Expression>  ProductExpression::clone() const{

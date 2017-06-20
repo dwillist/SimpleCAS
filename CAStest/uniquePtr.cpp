@@ -7,6 +7,8 @@ private:
 public:
   A(int i_inst):
     i(i_inst){}
+  A(A const & other) : i(other.i){}
+  A(A && other) : i(std::move(other.i)){}
   virtual int value(){
     return i;
   }
@@ -20,11 +22,10 @@ public:
   }
 };
 
-void function(std::unique_ptr<A> const & ptr){
-  std::cout << ptr->value() << std::endl;
 }
 
 int main(){
   std::unique_ptr<A> bptr(new B(5));
+  
   function(bptr);
 }

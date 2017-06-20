@@ -14,7 +14,7 @@
 namespace SF = SimplifyFunctions;
 namespace BM = boost::multiprecision;
 
-  
+
 //
 // CONSTRUCTORS
 //
@@ -29,14 +29,18 @@ Expression(FunctionTags::LOGORITHM,
            std::string(),
            log_operands)
   {
-    
+
   }
 
 
 LogExpression::LogExpression(std::unique_ptr<Expression>  base,std::unique_ptr<Expression>  argument) :
-LogExpression(SimplifyFunctions::buildBinaryVector(base,argument)){}
+LogExpression(SimplifyFunctions::makeBinaryVector(base,argument)){}
 
 LogExpression::LogExpression(const Expression & E) : Expression(E){
+  tag = FunctionTags::LOGORITHM;
+}
+
+LogExpression(Expression && E) : Expression(E){
   tag = FunctionTags::LOGORITHM;
 }
 
@@ -88,10 +92,9 @@ std::unique_ptr<Expression>  LogExpression::derivative(std::string with_respect_
   std::unique_ptr<Expression>  argument_derivative = getOperand(1)->derivative(with_respect_to);
   std::unique_ptr<Expression>  base_clone = getOperand(0)->clone();
   std::unique_ptr<Expression>  argument_clone = getOperand(1)->clone();
-  
+
   std::unique_ptr<Expression>  denom_product(new ProductExpression(std::move(argument_clone),
                                                                    SF::makeNaturalLog(base_clone)));
   return std::unique_ptr<Expression>(new ProductExpression(argument_derivative,SF::makeQuotent(new RationalExpression(1), denom_product)));
-  
-}
 
+}

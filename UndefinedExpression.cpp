@@ -33,6 +33,10 @@ UndefinedExpression::UndefinedExpression(const Expression & E) : Expression(E){
   tag = FunctionTags::UNDEFINED;
 }
 
+UndefinedExpression::UndefinedExpression(Expression && E) : Expression(E){
+  tag = FunctionTags::UNDEFINED;
+}
+
 
 
 std::unique_ptr<Expression>  UndefinedExpression::clone() const{

@@ -22,7 +22,7 @@ class UndefinedExpression : public Expression{
     // have to watch out for this copy constructor it probably does not do what you want
     // as it basically erases the operation and replaces it with undefined
     UndefinedExpression(const Expression & E);
-
+    UndefinedExpression(Expression && E);
 
 
     //
@@ -34,7 +34,7 @@ class UndefinedExpression : public Expression{
     virtual boost::multiprecision::cpp_rational getValue() const;
 
     virtual std::unique_ptr<Expression>  simplify();
-  
+
     virtual std::unique_ptr<Expression>  derivative(std::string with_respect_to);
 
 
