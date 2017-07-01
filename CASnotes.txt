@@ -9,5 +9,11 @@ TODO:
 5- might need to implement some custom numerical type to allow for prime factorization of large
    integers so that comparisons are more efficient.
 
+6-usage and consumption of unique_ptr's needs to be consistent!
+	general model is that anything that simplifies or makes will consume its arguments
+	and constructors do not consume, 
+	however currently constructors that that vector<unique_ptr> > do consume out of
+	nessesity... this needs to be fixed!
+
 NOTE:
   compilation may require c++11 due to initializing vectors and default < operator used in vectors

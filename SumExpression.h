@@ -19,6 +19,7 @@ class SumExpression : public Expression{
     //
 
     SumExpression(std::vector<std::unique_ptr<Expression>  > sum_operands);
+    //SumExpression(std::vector<std::unique_ptr<Expression>  > && sum_operands);
     SumExpression(const Expression & E);
     SumExpression(std::unique_ptr<Expression>  E1, std::unique_ptr<Expression>  E2); // binary sum constructor
     SumExpression(const Expression & E,std::size_t begin,std::size_t end);

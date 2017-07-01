@@ -80,7 +80,7 @@ bool SF::isUndefinedExponent(std::unique_ptr<Expression> const & base, std::uniq
 std::unique_ptr<Expression> SF::makeUndefinedExponenet(std::unique_ptr<Expression> base, std::unique_ptr<Expression> exponent){
   //TODO: check if this works need to watch that ExponentExpression that is created
   // is not destroyed when this function goes out of range, could cause some nasty bugs
-  return new unique_ptr<Expression>(UndefinedExpression(ExponentExpression(base,exponent)));
+  return new std::unique_ptr<Expression>(UndefinedExpression(ExponentExpression(std::move(base),std::move(exponent))));
 }
 
 bool SF::simplifiableToRational(std::unique_ptr<Expression> const & base,std::unique_ptr<Expression> const & exponent){
@@ -467,6 +467,6 @@ std::unique_ptr<Expression> SF::makeDifference(std::unique_ptr<Expression> minue
 
 std::unique_ptr<Expression> SF::makeQuotent(std::unique_ptr<Expression> dividend,std::unique_ptr<Expression> divisor){
   std::unique_ptr<Expression> divisor_expr = new ExponentExpression(divisor->clone(),new RationalExpression(-1));
-  return new ProductExpression(dividend->clone(),divisor_expr);
+  return std::unique_ptr<Expression>(new ProductExpression(dividend->clone(),divisor_expr));
 }
 )

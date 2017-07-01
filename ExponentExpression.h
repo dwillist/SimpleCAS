@@ -19,7 +19,7 @@ class ExponentExpression : public Expression{
     ExponentExpression(std::vector<std::unique_ptr<Expression> > exponent_operands);
     ExponentExpression(std::unique_ptr<Expression> base,std::unique_ptr<Expression> exponent);
     ExponentExpression(const Expression & E);
-    ExponentExpresion(Expression && other);
+    ExponentExpression(Expression && other);
   
 
     /**

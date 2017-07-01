@@ -22,11 +22,11 @@ UndefinedExpression::UndefinedExpression(std::vector<std::unique_ptr<Expression>
     false,
     boost::multiprecision::cpp_rational(),
     std::string(),
-    undefined_operands)
+             std::move(undefined_operands))
     {}
 
 UndefinedExpression::UndefinedExpression(std::unique_ptr<Expression>  E) :
-  UndefinedExpression(wrapWithVector(E)){}
+  UndefinedExpression(wrapWithVector(std::move(E))){}
 
 //
 UndefinedExpression::UndefinedExpression(const Expression & E) : Expression(E){
@@ -68,6 +68,6 @@ std::unique_ptr<Expression>  UndefinedExpression::derivative(std::string with_re
 
 std::vector<std::unique_ptr<Expression>  > wrapWithVector(std::unique_ptr<Expression>  E){
   std::vector<std::unique_ptr<Expression> > to_return;
-  to_return.push_back(E);
+  to_return.push_back(std::move(E));
   return to_return;
 }

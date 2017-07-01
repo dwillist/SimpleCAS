@@ -27,20 +27,20 @@ Expression(FunctionTags::LOGORITHM,
            false,
            BM::cpp_rational(),
            std::string(),
-           log_operands)
+           std::move(log_operands))
   {
 
   }
 
 
 LogExpression::LogExpression(std::unique_ptr<Expression>  base,std::unique_ptr<Expression>  argument) :
-LogExpression(SimplifyFunctions::makeBinaryVector(base,argument)){}
+LogExpression(SimplifyFunctions::makeBinaryVector(std::move(base),std::move(argument))){}
 
 LogExpression::LogExpression(const Expression & E) : Expression(E){
   tag = FunctionTags::LOGORITHM;
 }
 
-LogExpression(Expression && E) : Expression(E){
+LogExpression::LogExpression(Expression && E) : Expression(E){
   tag = FunctionTags::LOGORITHM;
 }
 
@@ -64,22 +64,22 @@ std::unique_ptr<Expression>  LogExpression::simplify(){
   std::unique_ptr<Expression>  base = getOperand(0)->simplify();
   std::unique_ptr<Expression>  argument = getOperand(1)->simplify();
   if(SF::isRational(base) && SF::isRational(argument)){
-    return SF::logorithmBothRational(std::move(base),std::move(argument));
+    return SF::simplifyLogorithmBothRational(std::move(base),std::move(argument));
   }
   else if(!SF::isRational(base)){
-    return SF::logorithmNonRationalBase(std::move(base), std::move(argument));
+    return SF::simplifyLogorithmNonRationalBase(std::move(base), std::move(argument));
   }
   else if(SF::isSum(argument)){
-    return SF::logorithmSum(std::move(base), std::move(argument));
+    return SF::simplifyLogorithmSum(std::move(base), std::move(argument));
   }
   else if(SF::isProduct(argument)){
-    return SF::logorithmProduct(std::move(base), std::move(argument));
+    return SF::simplifyLogorithmProduct(std::move(base), std::move(argument));
   }
   else if(SF::isExponent(argument)){
-    return SF::logorithmExponent(std::move(base), std::move(argument));
+    return SF::simplifyLogorithmExponent(std::move(base), std::move(argument));
   }
   else if(SF::isRational(base)){
-    return SF::logorithmRational(std::move(base), std::move(argument));
+    return SF::simplifyLogorithmRational(std::move(base), std::move(argument));
   }
   else{
     std::cout<< "Error log simplification not found" << std::endl;
@@ -94,7 +94,9 @@ std::unique_ptr<Expression>  LogExpression::derivative(std::string with_respect_
   std::unique_ptr<Expression>  argument_clone = getOperand(1)->clone();
 
   std::unique_ptr<Expression>  denom_product(new ProductExpression(std::move(argument_clone),
-                                                                   SF::makeNaturalLog(base_clone)));
-  return std::unique_ptr<Expression>(new ProductExpression(argument_derivative,SF::makeQuotent(new RationalExpression(1), denom_product)));
+                                                                   SF::makeNaturalLog(std::move(base_clone))));
+  return std::unique_ptr<Expression>(new ProductExpression(std::move(argument_derivative),
+                                                           SF::makeQuotent(                                                                                            std::unique_ptr<Expression>(new RationalExpression(1)),
+                                                                           std::move(denom_product))));
 
 }

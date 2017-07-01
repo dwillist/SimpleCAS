@@ -22,8 +22,20 @@ SumExpression::SumExpression(std::vector<std::unique_ptr<Expression>  > sum_oper
     true,
     boost::multiprecision::cpp_rational(0),
     std::string(),
-    sum_operands)
+    std::move(sum_operands))
     {}
+
+/*SumExpression::SumExpression(std::vector<std::unique_ptr<Expression>  > && sum_operands) :
+Expression(FunctionTags::SUM,
+           -1, // this is max value of size_t due to two's complement
+           0,
+           true,
+           true,
+           boost::multiprecision::cpp_rational(0),
+           std::string(),
+           std::move(sum_operands))
+{}
+*/
 
 SumExpression::SumExpression(const Expression & E) : Expression(E){
   tag = FunctionTags::SUM;
@@ -35,8 +47,8 @@ SumExpression::SumExpression(Expression && E) : Expression(E){
 
 
 
-SumExpression::SumExpression(std::unique_ptr<Expression>  E1, std::unique_ptr<Expression>  E2) :
-  SumExpression(SimplifyFunctions::makeBinaryVector(E1,E2)){}
+SumExpression::SumExpression(std::unique_ptr<Expression> E1, std::unique_ptr<Expression> E2) :
+  SumExpression(SimplifyFunctions::makeBinaryVector(E1->clone(),E2->clone())){}
 
 std::unique_ptr<Expression>  SumExpression::clone() const{
   return clone(0,size());
@@ -76,9 +88,9 @@ std::unique_ptr<Expression> SumExpression::simplify(){
     }
     std::unique_ptr<Expression>  new_sum(
                                          SimplifyFunctions::levelReduce(
-                                                    std::unique_ptr<Expression>(new SumExpression(simp_ops)),
+                                                                        std::unique_ptr<Expression>(new SumExpression(std::move(simp_ops))),
                                                     SF::sum_create_function));
-    return SF::sumSimplfy(new_sum);
+    return SF::sumSimplfy(std::move(new_sum));
   }
 }
 
@@ -87,5 +99,5 @@ std::unique_ptr<Expression>  SumExpression::derivative(std::string with_respect_
   for(auto && operand : operands){
     derivative_operands.push_back(operand->derivative((with_respect_to)));
   }
-  return std::unique_ptr<Expression>(new SumExpression(derivative_operands));
+  return std::unique_ptr<Expression>(new SumExpression(std::move(derivative_operands)));
 }

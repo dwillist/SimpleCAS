@@ -77,42 +77,42 @@ bool PL::isLogorithmSymbol(std::string & s){
   return s == FT::tag_to_print[FT::LOGORITHM];
 }
 
-Expression * PL::makeSum(std::vector<Expression *> expression_vec){
-  return new SumExpression(expression_vec);
+std::unique_ptr<Expression> PL::makeSum(std::vector<std::unique_ptr<Expression> > expression_vec){
+  return std::unique_ptr<Expression>(new SumExpression(expression_vec));
 }
 
-Expression * PL::makeProduct(std::vector<Expression *> expression_vec){
-  return new ProductExpression(expression_vec);
+std::unique_ptr<Expression> PL::makeProduct(std::vector<std::unique_ptr<Expression> > expression_vec){
+  return std::unique_ptr<Expression>(new ProductExpression(expression_vec));
 }
 
-Expression * PL::makeExponent(std::vector<Expression *> expression_vec){
-  return new ExponentExpression(expression_vec);
+std::unique_ptr<Expression> PL::makeExponent(std::vector<std::unique_ptr<Expression> > expression_vec){
+  return std::unique_ptr<Expression>(new ExponentExpression(expression_vec));
 }
 
-Expression * PL::makeRational(std::string & rational_string){
+std::unique_ptr<Expression> PL::makeRational(std::string & rational_string){
   if(isRational(rational_string)){
-    return new RationalExpression(BM::cpp_rational(rational_string));
+    return std::unique_ptr<Expression>(new RationalExpression(BM::cpp_rational(rational_string)));
   }
   throw "non rational name";
   return 0;
 }
 
-Expression * PL::makeLogorithm(std::vector<Expression *> expression_vec){
-  return new LogExpression(expression_vec);
+std::unique_ptr<Expression> PL::makeLogorithm(std::vector<std::unique_ptr<Expression> > expression_vec){
+  return std::unique_ptr<Expression>(new LogExpression(std::move(expression_vec)));
 }
 
-Expression * PL::makeVariable(std::string & variable_string){
+std::unique_ptr<Expression> PL::makeVariable(std::string & variable_string){
   if(isVariable(variable_string)){
-    return new VariableExpression(variable_string);
+    return std::unique_ptr<Expression>(new VariableExpression(variable_string));
   }
   throw "non variable name";
-  return 0;
+  return std::unique_ptr<Expression>(nullptr);
 }
 
-Expression * PL::makeExpression(std::vector<std::string> & s_vector, std::size_t & pos){
+std::unique_ptr<Expression> PL::makeExpression(std::vector<std::string> & s_vector, std::size_t & pos){
   std::size_t original_pos = pos;
-  std::vector<Expression *> expressions;
-  Expression * (*expression_build)(std::vector<Expression *>);
+  std::vector<std::unique_ptr<Expression>> expressions;
+  std::unique_ptr<Expression> (*expression_build)(std::vector<std::unique_ptr<Expression>>);
   for(; pos < s_vector.size(); pos++){
     std::cout << "current string : " << s_vector[pos] << std::endl;
     if(PL::isOpenParen(s_vector[pos]) && pos > original_pos){
@@ -166,7 +166,7 @@ std::vector<std::string> PL::breakString(std::string & s, std::string break_on){
 
 
 
-Expression * PL::parse(std::string & s){
+std::unique_ptr<Expression> PL::parse(std::string & s){
   std::vector<std::string> s_vector = PL::breakString(s," ");
   std::size_t pos = 0;
   return PL::makeExpression(s_vector,pos);

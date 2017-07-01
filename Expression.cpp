@@ -255,7 +255,7 @@ void deletePtrVec(std::vector<std::unique_ptr<Expression> > to_delete){
 
 std::unique_ptr<Expression> operator+(std::unique_ptr<Expression> const & lhs,
                                       std::unique_ptr<Expression> const & rhs){
-  return std::unique_ptr(new SumExpression(lhs->clone(),rhs->clone()));
+  return std::unique_ptr<Expression>(new SumExpression(lhs->clone(),rhs->clone()));
 }
 
 std::unique_ptr<Expression> operator-(std::unique_ptr<Expression> const & lhs,
@@ -286,6 +286,7 @@ std::unique_ptr<Expression> log(std::unique_ptr<Expression> const & lhs,
 std::unique_ptr<Expression> exp(std::unique_ptr<Expression> const & lhs,
                                 std::unique_ptr<Expression> const & rhs){
   return std::unique_ptr<Expression>(new SumExpression(lhs->clone(),rhs->clone()));
+}
 
 
 
