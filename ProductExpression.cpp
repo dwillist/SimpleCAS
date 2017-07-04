@@ -25,7 +25,7 @@ ProductExpression::ProductExpression(std::vector<std::unique_ptr<Expression>  > 
     true,
     boost::multiprecision::cpp_rational(),
     std::string(),
-    product_operands)
+    std::move(product_operands))
     {}
 
 ProductExpression::ProductExpression(const Expression & E) : Expression(E){
@@ -33,12 +33,12 @@ ProductExpression::ProductExpression(const Expression & E) : Expression(E){
 }
 
 ProductExpression::ProductExpression(Expression && E) : Expression(E){
-  tag = FunctionTags::Product;
+  tag = FunctionTags::PRODUCT;
 }
 
 // binary constructor
 ProductExpression::ProductExpression(std::unique_ptr<Expression>  E1, std::unique_ptr<Expression>  E2) :
-  ProductExpression(SimplifyFunctions::makeBinaryVector(E1,E2)){}
+  ProductExpression(SimplifyFunctions::makeBinaryVector(std::move(E1),std::move(E2))){}
 
 
 std::unique_ptr<Expression>  ProductExpression::clone() const{
@@ -54,7 +54,7 @@ std::unique_ptr<Expression>  ProductExpression::clone(std::size_t begin, std::si
 // CAS functions
 //
 
-std::unique_ptr<Expression>  ProductExpression::simplify(){
+std::unique_ptr<Expression> ProductExpression::simplify(){
   if(size() == 1){
     return getOperand(0)->clone();
   }
@@ -63,10 +63,10 @@ std::unique_ptr<Expression>  ProductExpression::simplify(){
     for(std::size_t i = 0; i < size(); ++i){
       simp_ops.push_back(getOperand(i)->simplify());
     }
-    std::unique_ptr<Expression>  new_prod = SimplifyFunctions::levelReduce(
-            new ProductExpression(simp_ops),
-            SF::product_create_function);
-    return SF::productSimplify(new_prod);
+    std::unique_ptr<Expression> simp_prod(new ProductExpression(std::move(simp_ops)));
+    std::unique_ptr<Expression>  new_prod = SimplifyFunctions::levelReduce(std::move(simp_prod),
+                                                                           SF::makeProductFunction);
+    return SF::productSimplify(std::move(new_prod));
   }
 }
 
@@ -79,5 +79,5 @@ std::unique_ptr<Expression>  ProductExpression::derivative(std::string with_resp
   else if( size() == 1){
     return getOperand(0)->derivative(with_respect_to);
   }
-  return std::unique_ptr<Expression>(new UndefinedExpression(this));
+  return SF::makeUndefined(this->clone());
 }

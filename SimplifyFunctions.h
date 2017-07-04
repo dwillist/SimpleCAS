@@ -52,8 +52,11 @@ namespace SimplifyFunctions{
     params: two expressions representing the base and exponenet of an ExponentExpression
     return: Expression of
   */
+  std::unique_ptr<Expression> makeUndefined(std::unique_ptr<Expression> expr);
+  
   std::unique_ptr<Expression> makeUndefinedExponenet(std::unique_ptr<Expression> base,
-                                                      std::unique_ptr<Expression> exponent);
+                                                     std::unique_ptr<Expression> exponent);
+
 
   bool simplifiableToRational(std::unique_ptr<Expression> const & base,
                               std::unique_ptr<Expression> const & exponent);
@@ -73,7 +76,7 @@ namespace SimplifyFunctions{
       -watch out conversion could be very lossy due to forced conversion from
       integer_exponent to type int (anything larger results in uncomputable exponenets)
   */
-  RationalExpression* rational_pow(std::unique_ptr<Expression> base,
+  std::unique_ptr<Expression> rational_pow(std::unique_ptr<Expression> base,
                                    std::unique_ptr<Expression> integer_exponent);
 
   bool hasRationalExponent(std::unique_ptr<Expression> const & E);
@@ -114,11 +117,11 @@ namespace SimplifyFunctions{
                                           std::unique_ptr<Expression> expression_create_function( std::vector< std::unique_ptr<Expression> >)
                                           );
 
-  std::unique_ptr<Expression> sum_create_function(std::vector<std::unique_ptr<Expression> > operand_vector);
-
-  std::unique_ptr<Expression> product_create_function(
-                                                  std::vector<std::unique_ptr<Expression> > operand_vector);
-
+  // The below are two functions that are passed to the level-reducer above as the expression_create_function
+  // depending on the context.
+  std::unique_ptr<Expression> makeSumFunction(std::vector<std::unique_ptr<Expression> > operand_vector);
+  std::unique_ptr<Expression> makeProductFunction(std::vector<std::unique_ptr<Expression> > operand_vector);
+  
   ///
   /// Addition Reduction
   ///

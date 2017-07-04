@@ -28,11 +28,11 @@ ExponentExpression::ExponentExpression(std::vector<std::unique_ptr<Expression> >
     false,
     boost::multiprecision::cpp_rational(),
     std::string(),
-    exponent_operands)
+    std::move(exponent_operands))
     {}
 
 ExponentExpression::ExponentExpression(std::unique_ptr<Expression> base,std::unique_ptr<Expression> exponent) :
-  ExponentExpression(SF::makeBinaryVector(base,exponent)){}
+ExponentExpression(SF::makeBinaryVector(std::move(base),std::move(exponent))){}
 
 ExponentExpression::ExponentExpression(const Expression & E) : Expression(E){
     tag = FT::EXPONENT;
@@ -72,19 +72,19 @@ std::unique_ptr<Expression> ExponentExpression::simplify(){
   std::unique_ptr<Expression> exponent(getOperand(1)->simplify());
   if(SF::isRational(base) && SF::isRational(exponent)){
     std::cout << "both ratonal: " << toString() << std::endl;
-    return SF::simplifyBothRational(base,exponent);
+    return SF::simplifyBothRational(std::move(base),std::move(exponent));
   }
   else if(SF::isRational(base)){
     std::cout << "base ratonal" << std::endl;
-    return SF::simplifyBaseRational(base,exponent);
+    return SF::simplifyBaseRational(std::move(base),std::move(exponent));
   }
   else if(SF::isRational(exponent)){
     std::cout << "exponent ratonal" << std::endl;
-    return SF::simplifyExponentRational(base,exponent);
+    return SF::simplifyExponentRational(std::move(base),std::move(exponent));
   }
   // other simplifications
   std::cout << "no simplification" << std::endl;
-  std::unique_ptr<Expression> to_return = new ExponentExpression(base,exponent);
+  std::unique_ptr<Expression> to_return(new ExponentExpression(std::move(base),std::move(exponent)));
   return to_return;
 }
 
@@ -98,6 +98,8 @@ std::unique_ptr<Expression> ExponentExpression::derivative(std::string with_resp
                                       new ProductExpression( base_derivative->clone(), SF::makeQuotent(exp_clone->clone(),base_clone->clone()))
                                          );
   std::unique_ptr<Expression> second_prod(new ProductExpression(exp_derivative->clone(),SF::makeNaturalLog(base_clone->clone())));
-  std::unique_ptr<Expression> sum_expr(new SumExpression(first_prod,second_prod));
-  return new ProductExpression(new ExponentExpression(base_clone,exp_clone),sum_expr);
+  std::unique_ptr<Expression> sum_expr(new SumExpression(std::move(first_prod),std::move(second_prod)));
+  std::unique_ptr<Expression> intermediate_exp_expression(new ExponentExpression(std::move(base_clone),std::move(exp_clone)));
+  return std::unique_ptr<Expression>(new ProductExpression(std::move(intermediate_exp_expression),
+                                                           std::move(sum_expr)));
 }

@@ -78,15 +78,15 @@ bool PL::isLogorithmSymbol(std::string & s){
 }
 
 std::unique_ptr<Expression> PL::makeSum(std::vector<std::unique_ptr<Expression> > expression_vec){
-  return std::unique_ptr<Expression>(new SumExpression(expression_vec));
+  return std::unique_ptr<Expression>(new SumExpression(std::move(expression_vec)));
 }
 
 std::unique_ptr<Expression> PL::makeProduct(std::vector<std::unique_ptr<Expression> > expression_vec){
-  return std::unique_ptr<Expression>(new ProductExpression(expression_vec));
+  return std::unique_ptr<Expression>(new ProductExpression(std::move(expression_vec)));
 }
 
 std::unique_ptr<Expression> PL::makeExponent(std::vector<std::unique_ptr<Expression> > expression_vec){
-  return std::unique_ptr<Expression>(new ExponentExpression(expression_vec));
+  return std::unique_ptr<Expression>(new ExponentExpression(std::move(expression_vec)));
 }
 
 std::unique_ptr<Expression> PL::makeRational(std::string & rational_string){
@@ -140,7 +140,7 @@ std::unique_ptr<Expression> PL::makeExpression(std::vector<std::string> & s_vect
       expressions.push_back(PL::makeVariable(s_vector[pos]));
     }
     else if(isCloseParen(s_vector[pos])){
-      return expression_build(expressions);
+      return expression_build(std::move(expressions));
     }
     else{
       std::cout << "unknown expression element: " << s_vector[pos] << std::endl;

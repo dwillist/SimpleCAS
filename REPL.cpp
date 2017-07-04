@@ -18,14 +18,14 @@ int main(){
     input = "";
     std::cin.ignore();
     std::getline(std::cin,input);
-    Expression * to_print = ParseLib::parse(input);
+    std::unique_ptr<Expression> to_print = ParseLib::parse(input);
     std::cout << "pre simplification" <<std::endl;
     std::cout << to_print->toString() << std::endl;
     std::cout << "post simplification" <<std::endl;
     std::cout << to_print->simplify()->toString() << std::endl;
-    Expression * deriv = to_print->derivative("x");
+    std::unique_ptr<Expression> deriv = to_print->derivative("x");
     std::cout << "post Derivative wrt x: " << deriv->toString() <<std::endl;
-    Expression * deriv_simp = deriv->simplify();
+    std::unique_ptr<Expression> deriv_simp = deriv->simplify();
     std::cout << "simplified derivative" << std::endl;
     std::cout << deriv_simp->toString() << std::endl;
     

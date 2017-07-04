@@ -89,7 +89,7 @@ std::unique_ptr<Expression> SumExpression::simplify(){
     std::unique_ptr<Expression>  new_sum(
                                          SimplifyFunctions::levelReduce(
                                                                         std::unique_ptr<Expression>(new SumExpression(std::move(simp_ops))),
-                                                    SF::sum_create_function));
+                                                    SF::makeSumFunction));
     return SF::sumSimplfy(std::move(new_sum));
   }
 }

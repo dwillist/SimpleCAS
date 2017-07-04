@@ -57,7 +57,11 @@ bool SF::isLogorithm(std::unique_ptr<Expression> const & expr){
 }
 
 std::vector<std::unique_ptr<Expression>  > SF::makeBinaryVector(std::unique_ptr<Expression> E1, std::unique_ptr<Expression> E2){
-  std::vector<std::unique_ptr<Expression> > to_return = {E1,E2};
+  //std::vector<std::unique_ptr<Expression> > to_return = {std::move(E1),std::move(E2)};
+  //std::vector<std::unique_ptr<Expression> > to_return = {std::move(E1),std::move(E2)};
+  std::vector<std::unique_ptr<Expression> > to_return;
+  to_return.push_back(std::move(E1));
+  to_return.push_back(std::move(E2));
   return to_return;
 }
 
@@ -76,11 +80,14 @@ bool SF::isUndefinedExponent(std::unique_ptr<Expression> const & base, std::uniq
 }
 
 
+std::unique_ptr<Expression> SF::makeUndefined(std::unique_ptr<Expression> expr){
+  return std::unique_ptr<Expression>(new UndefinedExpression(std::move(expr)));
+}
 
-std::unique_ptr<Expression> SF::makeUndefinedExponenet(std::unique_ptr<Expression> base, std::unique_ptr<Expression> exponent){
-  //TODO: check if this works need to watch that ExponentExpression that is created
-  // is not destroyed when this function goes out of range, could cause some nasty bugs
-  return new std::unique_ptr<Expression>(UndefinedExpression(ExponentExpression(std::move(base),std::move(exponent))));
+std::unique_ptr<Expression> SF::makeUndefinedExponenet(std::unique_ptr<Expression> base,
+                                                   std::unique_ptr<Expression> exponent){
+  std::unique_ptr<Expression> temp_exponenet(new ExponentExpression(std::move(base),std::move(exponent)));
+  return std::unique_ptr<Expression>(SF::makeUndefined(std::move(temp_exponenet)));
 }
 
 bool SF::simplifiableToRational(std::unique_ptr<Expression> const & base,std::unique_ptr<Expression> const & exponent){
@@ -96,7 +103,7 @@ std::unique_ptr<Expression> SF::simplifyBothRational(
   BM::cpp_rational base_value = base->getValue();
   BM::cpp_rational exponent_value = exponent->getValue();
   if(SF::isUndefinedExponent(base,exponent)){
-    return SF::makeUndefinedExponenet(base,exponent);
+    return SF::makeUndefinedExponenet(std::move(base),std::move(exponent));
   }
   else if(SF::simplifiableToRational(base,exponent)){
     if(base_value == 0 && exponent_value == 0){
@@ -109,49 +116,51 @@ std::unique_ptr<Expression> SF::simplifyBothRational(
       return std::unique_ptr<Expression>(new RationalExpression(0));
     }
     else{
-      return SF::rational_pow(base,exponent);
+      return SF::rational_pow(std::move(base),std::move(exponent));
     }
   }
   else{
-    return std::unique_ptr<Expression> (new ExponentExpression(base,exponent));
+    return std::unique_ptr<Expression> (new ExponentExpression(std::move(base),std::move(exponent)));
   }
 }
 
 std::unique_ptr<Expression> SF::simplifyBaseRational(std::unique_ptr<Expression> base,std::unique_ptr<Expression> exponent){
   if(SF::isUndefinedExponent(base,exponent)){
-    return SF::makeUndefinedExponenet(base,exponent);
+    return SF::makeUndefined(std::unique_ptr<Expression>(new ExponentExpression(std::move(base),
+                                                                                std::move(exponent))));
   }
   if(SF::isExponent(exponent)){
     // no simplification can result of
     // x ^ y ^ z if y ^ z cannot be simplified
-    return unique_ptr<Expression>(new ExponentExpression(base,exponent));
+    return std::unique_ptr<Expression>(new ExponentExpression(std::move(base),std::move(exponent)));
   }
   else if(SF::isProduct(exponent)){
     if(isInteger(exponent->getOperand(0))
        && SF::simplifiableToRational(base,exponent->getOperand(0))){
       // then we have a simplification of the following form
       // r^5*y -> (r^5)^y where r is rational
-      return unique_ptr<Expression>(new ExponentExpression(
-                  rational_pow(base,exponent->getOperand(0)),
-                  exponent->clone(1,exponent->size())
-                ));
+      return std::unique_ptr<Expression>(new ExponentExpression(rational_pow(std::move(base),
+                                                                             exponent->getOperand(0)),
+                                                                exponent->clone(1,exponent->size())));
     }
-    return unique_ptr<Expression>(new ExponentExpression(base,exponent));
+    return std::unique_ptr<Expression>(new ExponentExpression(std::move(base),std::move(exponent)));
   }
   else if(SF::isSum(exponent)){
     if(isInteger(exponent->getOperand(0)) && SF::simplifiableToRational(base,exponent->getOperand(0))){
       // we have a a simplification of the folowing form
       // r^5+y -> r^5 * r^y where r is rational
-      std::unique_ptr<Expression> rational_base(rational_pow(base,exponent->getOperand(0)))
+      std::unique_ptr<Expression> rational_base(rational_pow(base->clone(),exponent->getOperand(0)));
       std::unique_ptr<Expression> exponent_without_rational(new SumExpression(exponent->clone_operands(1,exponent->size())));
-      std::cout << "new Exponenet String " + exponenet_without_rational->toString() << std::endl;
+      std::cout << "new Exponenet String " + exponent_without_rational->toString() << std::endl;
       // below consumes exponenet_without_rational variable via move constructor
-      std::unique_ptr<Expression> variable_exponent(new ExponentExpression(base,exponent_without_rational));
-      return unique_ptr<Expression>(new ProductExpression(newBase, variable_exponent));
+      std::unique_ptr<Expression> variable_exponent(new ExponentExpression(std::move(base),
+                                                                           std::move(exponent_without_rational)));
+      return std::unique_ptr<Expression>(new ProductExpression(std::move(rational_base),
+                                                               std::move(variable_exponent)));
     }
   }
   //else
-  return unique_ptr<Expression>(new ExponentExpression(base,exponent));
+  return std::unique_ptr<Expression>(new ExponentExpression(std::move(base),std::move(exponent)));
 }
 
 // here i make the dubious simplification that (expr)^0 == 1, which is obviously not
@@ -159,23 +168,23 @@ std::unique_ptr<Expression> SF::simplifyBaseRational(std::unique_ptr<Expression>
 std::unique_ptr<Expression> SF::simplifyExponentRational(std::unique_ptr<Expression> base,std::unique_ptr<Expression> exponent){
   BM::cpp_rational exponent_value = exponent->getValue();
   if(SF::isUndefinedExponent(base,exponent)){
-    return SF::makeUndefinedExponenet(base,exponent);
+    return SF::makeUndefinedExponenet(std::move(base),std::move(exponent));
   }
   else if(exponent_value == 0){
     return std::unique_ptr<Expression>(new RationalExpression(1));
   }
   else if(SF::isExponent(base)){
-    return std::unique_ptr<Expression>(new ExponentExpression(
-      base -> getOperand(0),
-      std::unique_ptr<Expression>(new ProductExpression(exponent,base->getOperand(1))
-    )));
+    std::unique_ptr<Expression> temp_product(new ProductExpression(std::move(exponent)
+                                                                   ,base->getOperand(1)));
+    return std::unique_ptr<Expression>(new ExponentExpression(base -> getOperand(0),
+                                                              std::move(temp_product)));
   }
   //else
-  return std::unique_ptr<Expression>(new ExponentExpression(base,exponent));
+  return std::unique_ptr<Expression>(new ExponentExpression(std::move(base),std::move(exponent)));
 }
 
 // need this to be able to deal with negative exponents,
-std::unique_ptr<RationalExpression> SF::rational_pow(std::unique_ptr<Expression> base,
+std::unique_ptr<Expression> SF::rational_pow(std::unique_ptr<Expression> base,
                                                      std::unique_ptr<Expression> integer_exponent
                                                      ){
   std::cout << "rational pow called " << std::endl;
@@ -196,7 +205,8 @@ std::unique_ptr<RationalExpression> SF::rational_pow(std::unique_ptr<Expression>
     new_num = BM::pow(BM::numerator(base_value),int_exponent);
     new_denom = BM::pow(BM::denominator(base_value),int_exponent);
   }
-  return std::unique_ptr<RationalExpresison>(new RationalExpression(BM::cpp_rational(new_num,new_denom)));
+  return std::unique_ptr<Expression>(new RationalExpression(BM::cpp_rational(std::move(new_num),
+                                                                             std::move(new_denom))));
 }
 
 bool SF::hasRationalExponent(std::unique_ptr<Expression> const & E){
@@ -270,11 +280,11 @@ std::unique_ptr<Expression> SF::levelReduce(
 
 
 std::unique_ptr<Expression> SF::makeSumFunction(std::vector<std::unique_ptr<Expression> > operand_vector){
-  return std::unique_ptr<Expression>(new SumExpression(operand_vector));
+  return std::unique_ptr<Expression>(new SumExpression(std::move(operand_vector)));
 }
 
 std::unique_ptr<Expression> SF::makeProductFunction(std::vector<std::unique_ptr<Expression> > operand_vector){
-  return std::unique_ptr<Expression>(new ProductExpression(operand_vector));
+  return std::unique_ptr<Expression>(new ProductExpression(std::move(operand_vector)));
 }
 
 ///
@@ -290,8 +300,9 @@ std::unique_ptr<Expression> SF::sumSimplfy(std::unique_ptr<Expression> E){
   BM::cpp_rational constant;
   //
   std::vector<std::unique_ptr<Expression> > new_operands;
-  bool (*comp_ptr)(Expression*,Expression*) = SF::ptrLessThan;
-  std::map<Expression*,BM::cpp_rational,bool(*)(Expression*,Expression*)> op_map (comp_ptr);
+  bool (*comp_ptr)(const std::unique_ptr<Expression>&,const std::unique_ptr<Expression>&) = SF::ptrLessThan;
+  std::map<std::unique_ptr<Expression>,BM::cpp_rational,bool(*)(const std::unique_ptr<Expression>&,
+                                                                const std::unique_ptr<Expression>&)> op_map (comp_ptr);
   for(std::size_t i = 0; i < E->size(); ++i){
     std::unique_ptr<Expression> current_operand = E->getOperand(i);
     if(SF::isRational(current_operand)){
@@ -312,25 +323,25 @@ std::unique_ptr<Expression> SF::sumSimplfy(std::unique_ptr<Expression> E){
   }
   // now we need to turn our map into Expressions
   if(constant != 0){
-    std::unique_ptr<Expression> to_pb(new(RationalExpression(constant)));
-    new_operands.push_back(to_pb);
+    std::unique_ptr<Expression> to_pb(new RationalExpression(constant));
+    new_operands.push_back(std::move(to_pb));
   }
-  for(auto map_element: op_map){
+  for(const auto & map_element : op_map){
     if(map_element.second != 1){
       std::unique_ptr<Expression> factor(new RationalExpression(map_element.second));
-      std::unique_ptr<Expression> prod(new ProductExpression(factor,map_element.first->clone()));
+      std::unique_ptr<Expression> prod(new ProductExpression(std::move(factor),map_element.first->clone()));
       new_operands.push_back(prod->simplify());
       //delete factor; // should clean up memory leaks
       //delete prod;
     }
     else{
-      new_operands.push_back(map_element.first);
+      new_operands.push_back(map_element.first->clone());
     }
   }
   if(new_operands.size() == 1){
-    return new_operands[0];
+    return std::move(new_operands[0]);
   }
-  return std::unique_ptr<Expression>(new SumExpression(new_operands));
+  return std::unique_ptr<Expression>(new SumExpression(std::move(new_operands)));
 }
 
 ///
@@ -345,8 +356,9 @@ std::unique_ptr<Expression> SF::productSimplify(std::unique_ptr<Expression> E){
   BM::cpp_rational constant = BM::cpp_rational(1);
   //
   std::vector<std::unique_ptr<Expression> > new_operands;
-  bool (*comp_ptr)(Expression*,Expression*) = SF::ptrLessThan;
-  std::map<Expression*,BM::cpp_rational,bool(*)(Expression*,Expression*)> op_map (comp_ptr);
+  bool (*comp_ptr)(const std::unique_ptr<Expression>&,const std::unique_ptr<Expression>&) = SF::ptrLessThan;
+  std::map<std::unique_ptr<Expression>,BM::cpp_rational,bool(*)(const std::unique_ptr<Expression>&,
+                                                                const std::unique_ptr<Expression>&) > op_map (comp_ptr);
   for(std::size_t i = 0; i < E->size(); ++i){
     std::unique_ptr<Expression> current_operand = E->getOperand(i);
     if(SF::isRational(current_operand)){
@@ -356,7 +368,7 @@ std::unique_ptr<Expression> SF::productSimplify(std::unique_ptr<Expression> E){
       // we assume that if current_operand is a sum it must have 2 or more operands
       if(SF::isExponent(current_operand) && hasRationalExponent(current_operand)){
         //TODO: check if this is vaid
-        op_map[current_operand->getClone(0)] += SF::getExponentConstant(current_operand);
+        op_map[current_operand->getOperand(0)] += SF::getExponentConstant(current_operand);
       }
       else if(SF::isProduct(current_operand)){
         std::cout << "Sum detected in general Reduce, this should not be here" << std::endl;
@@ -369,30 +381,31 @@ std::unique_ptr<Expression> SF::productSimplify(std::unique_ptr<Expression> E){
   // now we need to turn our map into Expressions
   //std::vector<std::unique_ptr<Expression> > new_operands; declared above
   if( constant == 0){
-    deletePtrVec(new_operands);
-    return unique_ptr<Expression>(new RationalExpression(0));
+    //deletePtrVec(std::move(new_operands));
+    return std::unique_ptr<Expression>(new RationalExpression(0));
   }
 
   else if(constant != 1){
-    new_operands.push_back(new RationalExpression(constant));
+    new_operands.push_back(std::unique_ptr<Expression>(new RationalExpression(constant)));
   }
-  for(auto map_element: op_map){
+  for(const auto & map_element : op_map){
     if(map_element.second != 1){
       //NOTE: really should use unique pointers
-      Rationalstd::unique_ptr<Expression> exponent(new RationalExpression(map_element.second));
-      Exponentstd::unique_ptr<Expression> new_exp_expr(new ExponentExpression(map_element.first->clone(),exponent));
+      std::unique_ptr<Expression> exponent(new RationalExpression(map_element.second));
+      std::unique_ptr<Expression> new_exp_expr(new ExponentExpression(map_element.first->clone(),
+                                                                      std::move(exponent)));
       new_operands.push_back(new_exp_expr->simplify());
       //delete factor; // should clean up memory leaks
       //delete prod;
     }
     else{
-      new_operands.push_back(map_element.first);
+      new_operands.push_back(map_element.first->clone());
     }
   }
   if(new_operands.size() == 1){
-    return new_operands[0];
+    return std::move(new_operands[0]);
   }
-  return unique_ptr<Expression>(new ProductExpression(new_operands));
+  return std::unique_ptr<Expression>(new ProductExpression(std::move(new_operands)));
 }
 
 
@@ -412,33 +425,33 @@ std::unique_ptr<Expression> SF::simplifyLogorithmBothRational(std::unique_ptr<Ex
 
 std::unique_ptr<Expression> SF::simplifyLogorithmNonRationalBase(std::unique_ptr<Expression> base, std::unique_ptr<Expression> argument){
   std::unique_ptr<Expression> inner_log(new LogExpression(std::unique_ptr<Expression>(new RationalExpression(2)),base->clone()));
-  std::unique_ptr<Expression> denom(new ExponentExpression(inner_log,std::unique_ptr<Expression>(new RationalExpression(-1))));
+  std::unique_ptr<Expression> denom(new ExponentExpression(std::move(inner_log),std::unique_ptr<Expression>(new RationalExpression(-1))));
   //std::unique_ptr<Expression> denom(new ExponentExpression(new LogExpression(new RationalExpression(2),base->clone()), new RationalExpression(-1)));
-  std::unique_ptr<Expression> num(new std::unique_ptr<Expression(new LogExpression(std::unique_ptr<Expression>(new RationalExpression(2)),argument->clone())));
-  return std::unique_ptr<Expression>(new ProductExpression(num,denom));
+  std::unique_ptr<Expression> num(std::unique_ptr<Expression>(new LogExpression(std::unique_ptr<Expression>(new RationalExpression(2)),argument->clone())));
+  return std::unique_ptr<Expression>(new ProductExpression(std::move(num),std::move(denom)));
 }
 
 std::unique_ptr<Expression> SF::simplifyLogorithmSum(std::unique_ptr<Expression> base, std::unique_ptr<Expression> argument){
-  return std::unique_ptr<Expression>(new LogExpression(base,argument));
+  return std::unique_ptr<Expression>(new LogExpression(std::move(base),std::move(argument)));
 }
 
-std::unique_ptr<Expression> SF::simplfyLogorithmProduct(std::unique_ptr<Expression> base, std::unique_ptr<Expression> argument){
+std::unique_ptr<Expression> SF::simplifyLogorithmProduct(std::unique_ptr<Expression> base, std::unique_ptr<Expression> argument){
   std::vector<std::unique_ptr<Expression> > sum_vector;
   for(std::size_t i = 0; i < argument->size(); ++i){
-    sum_vector.push_back(std::unique_ptr<Expression>(new LogExpression(base->clone(),argument->getClone(i))));
+    sum_vector.push_back(std::unique_ptr<Expression>(new LogExpression(base->clone(),argument->getOperand(i))));
   }
-  return std::unique_ptr<Expression>(new SumExpression(sum_vector));
+  return std::unique_ptr<Expression>(new SumExpression(std::move(sum_vector)));
 }
 
-std::unique_ptr<Expression> SF::simplfyLogorithmExponent(std::unique_ptr<Expression> base, std::unique_ptr<Expression> argument){
-  std::unique_ptr<Expression> exp_base = argument ->getClone(0);
-  std::unique_ptr<Expression> exp_exponent = argument -> getClone(1);
-  std::unique_ptr<Expression> new_log(new LogExpression(base, exp_base));
-  return std::unique_ptr<Expression>(new ProductExpression(exp_exponent,new_log));
+std::unique_ptr<Expression> SF::simplifyLogorithmExponent(std::unique_ptr<Expression> base, std::unique_ptr<Expression> argument){
+  std::unique_ptr<Expression> exp_base = argument ->getOperand(0);
+  std::unique_ptr<Expression> exp_exponent = argument -> getOperand(1);
+  std::unique_ptr<Expression> new_log(new LogExpression(std::move(base),std::move(exp_base)));
+  return std::unique_ptr<Expression>(new ProductExpression(std::move(exp_exponent),std::move(new_log)));
 }
 
 std::unique_ptr<Expression> SF::simplifyLogorithmRational(std::unique_ptr<Expression> base, std::unique_ptr<Expression> argument){
-  return std::unique_ptr<Expression>(new LogExpression(base,argument));
+  return std::unique_ptr<Expression>(new LogExpression(std::move(base),std::move(argument)));
 }
 
 ///
@@ -446,9 +459,8 @@ std::unique_ptr<Expression> SF::simplifyLogorithmRational(std::unique_ptr<Expres
 ///
 
 std::unique_ptr<Expression> SF::makeNaturalLog(std::unique_ptr<Expression> argument){
-  return std::unique_ptr<Expression>(newLogExpression(
-    std::unique_ptr<Expression>(new RationalExpression(
-      static_cast<BM::cpp_rational>(boost::math::float_constants::e)),argument->clone())));
+  return std::unique_ptr<Expression>(new LogExpression(std::unique_ptr<Expression>(new RationalExpression(static_cast<BM::cpp_rational>(boost::math::float_constants::e))),
+                                                                                   std::move(argument)));
 }
 
 //
@@ -457,7 +469,7 @@ std::unique_ptr<Expression> SF::makeNaturalLog(std::unique_ptr<Expression> argum
 
 std::unique_ptr<Expression> SF::makeDifference(std::unique_ptr<Expression> minuend,std::unique_ptr<Expression> subtrahend){
   std::unique_ptr<Expression> subtrahend_expr(new ProductExpression(std::unique_ptr<Expression>(new RationalExpression(-1)),subtrahend->clone()));
-  return std::unique_ptr<Expression>( new SumExpression(minuend->clone(),subtrahend_expr));
+  return std::unique_ptr<Expression>( new SumExpression(minuend->clone(),std::move(subtrahend_expr)));
 }
 
 
@@ -466,7 +478,7 @@ std::unique_ptr<Expression> SF::makeDifference(std::unique_ptr<Expression> minue
 //
 
 std::unique_ptr<Expression> SF::makeQuotent(std::unique_ptr<Expression> dividend,std::unique_ptr<Expression> divisor){
-  std::unique_ptr<Expression> divisor_expr = new ExponentExpression(divisor->clone(),new RationalExpression(-1));
-  return std::unique_ptr<Expression>(new ProductExpression(dividend->clone(),divisor_expr));
+  std::unique_ptr<Expression> divisor_expr(new ExponentExpression(divisor->clone(),
+                                                                    std::unique_ptr<Expression>(new RationalExpression(-1))));
+  return std::unique_ptr<Expression>(new ProductExpression(dividend->clone(),std::move(divisor_expr)));
 }
-)

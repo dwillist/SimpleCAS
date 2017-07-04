@@ -229,7 +229,7 @@ std::unique_ptr<Expression> Expression::simplify(){
 std::vector<std::unique_ptr<Expression> > Expression::clone_operands(std::size_t begin,std::size_t end) const{
   std::vector<std::unique_ptr<Expression> > to_return;
   for(std::size_t i = begin; i < std::min(end,size()); ++i){
-    to_return.push_back(getClone(i));
+    to_return.push_back(getOperand(i));
   }
   return to_return;
 }

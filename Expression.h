@@ -132,8 +132,6 @@ protected:
   */
   virtual std::unique_ptr<Expression> getOperand(std::size_t pos) const;
 
-  std::unique_ptr<Expression> getClone(std::size_t pos) const;
-
 
   //
   // CAS functions

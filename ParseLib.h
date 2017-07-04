@@ -33,23 +33,23 @@ namespace ParseLib{
   
   bool isLogorithmSymbol(std::string & x);
 
-  Expression * makeSum(std::vector<Expression *> expression_vec);
+  std::unique_ptr<Expression> makeSum(std::vector<std::unique_ptr<Expression> > expression_vec);
 
-  Expression * makeProduct(std::vector<Expression *> expression_vec);
+  std::unique_ptr<Expression> makeProduct(std::vector<std::unique_ptr<Expression> > expression_vec);
 
-  Expression * makeExponent(std::vector<Expression *> expression_vec);
+  std::unique_ptr<Expression> makeExponent(std::vector<std::unique_ptr<Expression> > expression_vec);
   
-  Expression * makeLogorithm(std::vector<Expression *> expression_vec);
+  std::unique_ptr<Expression> makeLogorithm(std::vector<std::unique_ptr<Expression> > expression_vec);
 
-  Expression * makeRational(std::string & rational_string);
+  std::unique_ptr<Expression> makeRational(std::string & rational_string);
 
-  Expression * makeVariable(std::string & variable_string);
+  std::unique_ptr<Expression> makeVariable(std::string & variable_string);
 
-  Expression * makeExpression(std::vector<std::string> & s, std::size_t & pos);
+  std::unique_ptr<Expression> makeExpression(std::vector<std::string> & s, std::size_t & pos);
 
   std::vector<std::string> breakString(std::string & s, std::string break_on);
 
-  Expression * parse(std::string & s);
+  std::unique_ptr<Expression> parse(std::string & s);
 
 }
 
